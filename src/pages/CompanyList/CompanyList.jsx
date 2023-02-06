@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { useLayoutEffect } from "react"
 import { useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -7,12 +6,7 @@ import { toast } from "react-toastify"
 import Filters from "../../components/Filters/Filters"
 import Modal from "../../components/Modal/Modal"
 import Table from "../../components/Table/Table"
-import { allBrands } from "../../redux/slices/brands/brands"
-import {
-  DeleteSelectedCompany,
-  GetAllBrandList,
-  UpdateCompany
-} from "../../services"
+import { DeleteSelectedCompany, UpdateCompany } from "../../services"
 import { baseURL } from "../../utils/http"
 import { DeleteMini, EditMini } from "../../utils/icons"
 import DeleteCompany from "../ModelList/Components/DeleteModel"
@@ -23,7 +17,7 @@ const CompanyList = () => {
 
   const navigate = useNavigate()
 
-  const { allBrandList } = useSelector(({ brands }) => brands)
+  const { allBrandsDump } = useSelector(({ brands }) => brands)
 
   const [action, setAction] = useState("")
   const [open, setOpen] = useState(false)
@@ -31,20 +25,6 @@ const CompanyList = () => {
   const [editedData, setEditedData] = useState("")
   const [totalRows, setTotalRows] = useState(1)
   const [perPage, setPerPage] = useState(10)
-
-  useLayoutEffect(() => {
-    getData(perPage, totalRows)
-  }, [])
-
-  const getData = () => {
-    GetAllBrandList()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allBrands(resp))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!"))
-  }
 
   const handlePageChange = (page) => {
     setPerPage(page)
@@ -82,10 +62,16 @@ const CompanyList = () => {
         selector: (row) => row.action,
         cell: (row) => (
           <div className="flex justify-between gap-2">
-            <span onClick={() => handleAction("edit", row)}>
+            <span
+              onClick={() => handleAction("edit", row)}
+              className="cursor-pointer"
+            >
               <EditMini />
             </span>
-            <span onClick={() => handleAction("delete", row)}>
+            <span
+              onClick={() => handleAction("delete", row)}
+              className="cursor-pointer"
+            >
               <DeleteMini />
             </span>
           </div>
@@ -187,8 +173,8 @@ const CompanyList = () => {
             <div className="shadow-md px-3 my-3">
               <Table
                 columns={columns}
-                data={allBrandList?.data}
-                paginationData={allBrandList?.meta}
+                data={allBrandsDump?.data}
+                paginationData={allBrandsDump?.meta}
                 handlePerRowsChange={(e) => handlePerRowsChange(e)}
                 handlePageChange={(e) => handlePageChange(e)}
               />

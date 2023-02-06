@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useState } from "react"
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react"
 import { XMarkIcon } from "@heroicons/react/24/outline"
 import {
@@ -12,13 +12,8 @@ import Pagination from "../../components/Pagination/Pagination"
 import { useNavigate } from "react-router-dom"
 import Category from "../../components/Category/Category"
 import SlickSlider from "../../components/Slider/Slider"
-import { useLayoutEffect } from "react"
-import { GetAllProductMedia, GetAllProducts } from "../../services"
-import { toast } from "react-toastify"
-import { useDispatch, useSelector } from "react-redux"
-import { allProductList } from "../../redux/slices/product/product"
+import { useSelector } from "react-redux"
 import { baseURL } from "../../utils/http"
-import { EditMini } from "../../utils/icons"
 
 const sortOptions = [
   { name: "Most Popular", href: "#", current: true },
@@ -78,23 +73,9 @@ function classNames(...classes) {
 
 export default function ProductListing() {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const { productList } = useSelector(({ product }) => product)
-
-  console.log(productList)
-
-  useLayoutEffect(() => {
-    //all prodcts
-    GetAllProducts()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allProductList(resp.data))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!"))
-  }, [])
 
   const handleAddProduct = () => {
     navigate("/add-product")

@@ -1,16 +1,13 @@
 import React from "react"
 import { useMemo } from "react"
 import { useState } from "react"
-import { useLayoutEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import Filters from "../../components/Filters/Filters"
 import Modal from "../../components/Modal/Modal"
 import Table from "../../components/Table/Table"
-import { allModels } from "../../redux/slices/models/models"
 import {
-  GetAllModelsList,
   UpdateModel,
   DeleteSelectedModel
 } from "../../services"
@@ -21,8 +18,6 @@ import EditModel from "./Components/EditModel"
 const ModelList = () => {
   const navigate = useNavigate()
 
-  const dispatch = useDispatch()
-
   const { allModelList } = useSelector(({ models }) => models)
 
   const [action, setAction] = useState("")
@@ -32,23 +27,8 @@ const ModelList = () => {
   const [totalRows, setTotalRows] = useState(1)
   const [perPage, setPerPage] = useState(10)
 
-  useLayoutEffect(() => {
-    getData(perPage, totalRows)
-  }, [])
-  
-  const getData = (perPage, totalRows = 10) => {
-    GetAllModelsList({ perPage, totalRows })
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allModels(resp))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!!"))
-  }
-
   const handlePageChange = (page) => {
     setPerPage(page)
-    getData(page)
   }
 
   const handlePerRowsChange = (rows) => {
@@ -71,10 +51,16 @@ const ModelList = () => {
         selector: (row) => row.action,
         cell: (row) => (
           <div className="flex justify-between gap-2">
-            <span onClick={() => handleAction("edit", row)}>
+            <span
+              onClick={() => handleAction("edit", row)}
+              className="cursor-pointer"
+            >
               <EditMini />
             </span>
-            <span onClick={() => handleAction("delete", row)}>
+            <span
+              onClick={() => handleAction("delete", row)}
+              className="cursor-pointer"
+            >
               <DeleteMini />
             </span>
           </div>

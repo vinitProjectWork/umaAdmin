@@ -1,43 +1,57 @@
+import { useEffect } from "react"
+import { Fragment } from "react"
 import { useState } from "react"
+import { useDropzone } from "react-dropzone"
 import { useForm } from "react-hook-form"
-
-const MAX_COUNT = 5
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { PostCategory } from "../../services"
 
 const AddCategory = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([])
-  const [fileLimit, setFileLimit] = useState(false)
-
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm()
 
-  const handleUploadFiles = (files) => {
-    const uploaded = [...uploadedFiles]
-    let limitExceeded = false
-    files.some((file) => {
-      if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        uploaded.push(file)
-        if (uploaded.length === MAX_COUNT) setFileLimit(true)
-        if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`)
-          setFileLimit(false)
-          limitExceeded = true
-          return true
-        }
-      }
-    })
-    if (!limitExceeded) setUploadedFiles(uploaded)
-  }
+  const [uploadedImage, setUploadedImage] = useState(null)
 
-  const handleFileEvent = (e) => {
-    const chosenFiles = Array.prototype.slice.call(e.target.files)
-    handleUploadFiles(chosenFiles)
-  }
+  useEffect(() => {
+    // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
+    return () =>
+      uploadedImage?.forEach((file) => URL.revokeObjectURL(file.preview))
+  }, [uploadedImage])
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/*": [],
+      "video/*": []
+    },
+    maxFiles: 1,
+    onDrop: (acceptedFiles) => {
+      const _files = acceptedFiles.map((file, index) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+          order: index + 1
+        })
+      )
+      setUploadedImage(_files)
+    }
+  })
 
   const createCategory = (data) => {
-    console.log(data)
+    const formData = new FormData()
+    const { name } = data
+    formData.append("data", JSON.stringify({ name }))
+    formData.append("files.image", uploadedImage[0], uploadedImage[0].name)
+
+    PostCategory(formData)
+      .then((resp) => {
+        toast.success("Category Added Successfully")
+        navigate("/category-list")
+      })
+      .catch((err) => toast.error("Something went wrong"))
   }
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
@@ -63,7 +77,7 @@ const AddCategory = () => {
               name="category-name"
               placeholder="Enter full name"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("category_name", { required: true })}
+              {...register("name", { required: true })}
             />
             {errors.category_name && (
               <p className="text-red-500 font-normal text-sm">
@@ -74,49 +88,40 @@ const AddCategory = () => {
 
           <div className="sm:col-span-2">
             <label
-              htmlFor="availibility"
-              className="inline-block text-gray-800 text-sm sm:text-base mb-2"
-            >
-              Product Availibility
-            </label>
-            <select
-              name="availibility"
-              className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("availibility", { required: true })}
-            >
-              <option value="0">In Stock</option>
-              <option value="1">Out of Stock</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-2">
-            <label
               htmlFor="images"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
               Images
             </label>
-            <input
-              name="images"
-              type="file"
-              multiple
-              className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              accept="image/png"
-              onChange={handleFileEvent}
-              disabled={fileLimit}
-              {...register("images", { required: true })}
-            />
-            {errors.category_name && (
-              <p className="text-red-500 font-normal text-sm">
-                Image name is required
-              </p>
-            )}
+            <div className="border-2 w-full rounded-md">
+              <div
+                {...getRootProps({ className: "dropzone" })}
+                className="cursor-pointer p-2"
+              >
+                <input
+                  {...getInputProps()}
+                  className="outline-none w-full p-2"
+                />
+                <p>Choose image</p>
+              </div>
+            </div>
           </div>
 
-          {/* <div className="w-full border sm:col-span-2 rounded-sm shadow-sm p-2 flex flex-col gap-3">
-            <p className="text-sm font-medium border-b pb-2">Uploaded Images</p>
-            <img src="" alt="test"  />
-          </div> */}
+          {uploadedImage
+            ? uploadedImage.map((file, index) => {
+                return (
+                  <div className="flex flex-col gap-2" key={index}>
+                    <p>Selected image</p>
+                    <img
+                      src={file.preview}
+                      key={index}
+                      alt="text"
+                      className="w-24 h-24"
+                    />
+                  </div>
+                )
+              })
+            : null}
 
           <div className="sm:col-span-2 flex justify-between items-center">
             <button

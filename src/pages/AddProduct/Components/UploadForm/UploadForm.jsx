@@ -1,4 +1,3 @@
-import { useState } from "react"
 import Previews from "../../../../components/DropZone/DropZone"
 
 const UploadForm = ({ setData }) => {

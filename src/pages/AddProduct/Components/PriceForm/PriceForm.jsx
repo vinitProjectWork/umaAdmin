@@ -122,11 +122,7 @@ const PriceForm = ({ setData, data }) => {
               <p className="font-medium">GST: 18%</p>
               <p>
                 <span className="font-medium">Total GST: </span>
-                {`${data.price * 0.18}`}
-              </p>
-              <p>
-                <span className="font-medium">Price without GST: </span>
-                {`${data.price - data.price * 0.18}`}
+                {`${(data.price * 100) / 118}`}
               </p>
             </div>
           </div>

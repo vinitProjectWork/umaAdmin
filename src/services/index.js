@@ -2,6 +2,7 @@ import { formToJSON } from "axios"
 import {
   createBrand,
   deleteBrand,
+  deleteCategory,
   deleteModel,
   editBrand,
   editModel,
@@ -11,8 +12,10 @@ import {
   getAllProductMedia,
   getAllProducts,
   getAllSubCategory,
+  postCategory,
   postProduct,
-  postProductMedia
+  postProductMedia,
+  updateCategory
 } from "../utils/apiRoutes"
 import { http } from "../utils/http"
 
@@ -21,6 +24,47 @@ export const GetAllCategories = async () => {
   try {
     const { data } = await http.get(getAllCategory.endPoint, {
       withCredentials: true
+    })
+
+    return data
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
+// Get All Categories
+export const UpdateCategory = async (id, formdata) => {
+  try {
+    const { data } = await http.put(
+      updateCategory.endPoint + `/${id}`,
+      formdata
+    )
+
+    return data
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
+// Get All Categories
+export const DeleteSelectedCategory = async ({ id }) => {
+  try {
+    const { data } = await http.delete(deleteCategory.endPoint + `/${id}`, {
+      withCredentials: true
+    })
+
+    return data
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
+// Get All Categories
+export const PostCategory = async (formData) => {
+  try {
+    const { data } = await http.post(postCategory.endPoint, {
+      withCredentials: true,
+      data: formData
     })
 
     return data
@@ -44,9 +88,11 @@ export const GetAllSubCategories = async () => {
 
 // Get All Categories
 // ?pagination[page]=1&pagination[pageSize]=10
-
-export const GetAllModelsList = async ({ perPage, totalRows }) => {
-  const paginationUrl = `?pagination[page]=${totalRows}&pagination[pageSize]=${perPage}`
+// {
+//   perPage, totalRows
+// }
+export const GetAllModelsList = async () => {
+  // const paginationUrl = `?pagination[page]=${totalRows}&pagination[pageSize]=${perPage}`
   try {
     const { data } = await http.get(getAllModels.endPoint, {
       withCredentials: true
@@ -54,7 +100,6 @@ export const GetAllModelsList = async ({ perPage, totalRows }) => {
 
     return data
   } catch (err) {
-    console.log("reject")
     return Promise.reject(err)
   }
 }

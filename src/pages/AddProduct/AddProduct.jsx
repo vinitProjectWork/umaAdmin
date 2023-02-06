@@ -1,16 +1,10 @@
-import { Fragment, useEffect } from "react"
-import { useLayoutEffect } from "react"
+import { Fragment } from "react"
 import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { toast } from "react-toastify"
 import SelectComponent from "../../components/Select/Select"
-import { allCategory } from "../../redux/slices/category/category"
-import {
-  CreateProduct,
-  GetAllCategories,
-  PostProductMedia
-} from "../../services"
+import { CreateProduct, PostProductMedia } from "../../services"
 import { Details, Media, Mobile, Money } from "../../utils/icons"
 import AddProductForm from "./Components/AddProductForm/AddProductForm"
 import ModelsForm from "./Components/ModelsForm/ModelsForm"
@@ -25,38 +19,17 @@ const STEPS = [
 ]
 
 const AddProduct = () => {
-  const dispatch = useDispatch()
+
   const location = useLocation()
 
+  console.log(location)
+
   const { allCategoryList } = useSelector(({ category }) => category)
-  const { productMedia, mediaId } = useSelector(({ product }) => product)
+  const { productMedia } = useSelector(({ product }) => product)
 
   const [data, setData] = useState({})
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-
-  useEffect(() => {
-    if (location?.state) {
-      setData({ ...location?.state?.attributes, id: location?.state?.id })
-      setSelectedCategory(location?.state?.attributes?.category?.data?.id)
-    }
-  }, [location?.state])
-
-  useLayoutEffect(() => {
-    GetAllCategories()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          const _data = resp.data.map((item) => {
-            return {
-              label: item.attributes.name,
-              value: item.id
-            }
-          })
-          dispatch(allCategory([..._data]))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong"))
-  }, [])
 
   const handleNext = () => {
     setCurrentIndex((old) => old + 1)
@@ -82,7 +55,7 @@ const AddProduct = () => {
           mediaData.push(values?.data?.id)
           toast.success(`${media.name} uploaded successfully`)
         })
-        .catch((err) => {
+        .catch(() => {
           error = true
           toast.error("Something went wrong!")
         })
@@ -103,13 +76,13 @@ const AddProduct = () => {
         })
       )
       data.originalPrice = data.price
-      console.log(data)
+      data.category = selectedCategory
       CreateProduct(data)
         .then((resp) => {
           productMediaUpload(resp.data.id)
           resetForm()
         })
-        .catch((err) => toast.error("Something went wrong"))
+        .catch(() => toast.error("Something went wrong"))
     } else {
       toast.error("Media is not selected.")
     }

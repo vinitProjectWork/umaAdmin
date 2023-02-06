@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation } from "react-router-dom"
-import { toast } from "react-toastify"
-import { addMedia, addMediaId } from "../../redux/slices/product/product"
-import { PostProductMedia } from "../../services"
+import { addMedia } from "../../redux/slices/product/product"
 import { baseURL } from "../../utils/http"
 import { DeleteMini } from "../../utils/icons"
-import Modal from "../Modal/Modal"
 
 const thumbsContainer = {
   display: "flex",
@@ -62,8 +59,6 @@ const Previews = () => {
   }, [location?.state])
   const { productMedia } = useSelector(({ product }) => product)
 
-  console.log(productMedia)
-
   // const [files, setFiles] = useState([])
 
   // useEffect(() => {
@@ -92,7 +87,6 @@ const Previews = () => {
           order: index + 1
         })
       )
-      // setFiles(_files)
       dispatch(addMedia(_files))
     }
   })
@@ -106,7 +100,10 @@ const Previews = () => {
   }
 
   const removeImages = (index) => {
-    const _files = productMedia
+    // const _files = [...productMedia]
+    // const _remainingFiles = _files.splice(index, 1)
+    // console.log("==>", _remainingFiles)
+    // dispatch(addMedia())
   }
 
   const thumbs = productMedia.map((file, index) => (
@@ -126,11 +123,11 @@ const Previews = () => {
             )
           }
         />
-        {location?.state !== "" ? (
+        {/* {location?.state !== "" ? (
           <span onClick={() => removeImages(index)}>
             <DeleteMini />
           </span>
-        ) : null}
+        ) : null} */}
       </div>
       <div style={thumb}>
         <div style={thumbInner} className="flex flex-col">

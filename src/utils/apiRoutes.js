@@ -15,7 +15,7 @@ const appAPI = {
     method: requestMethodTypes.GET
   },
   getAllSubCategory: {
-    endPoint: `${BASE_URL}/api/sub-categories`,
+    endPoint: `${BASE_URL}/api/sub-categories?populate=*`,
     method: requestMethodTypes.GET
   },
   getAllModels: {
@@ -65,6 +65,18 @@ const appAPI = {
   postProduct: {
     endPoint: `${BASE_URL}/api/products`,
     method: requestMethodTypes.POST
+  },
+  updateCategory: {
+    endPoint: `${BASE_URL}/api/categories`,
+    method: requestMethodTypes.PUT
+  },
+  deleteCategory: {
+    endPoint: `${BASE_URL}/api/categories`,
+    method: requestMethodTypes.DELETE
+  },
+  postCategory: {
+    endPoint: `${BASE_URL}/api/categories`,
+    method: requestMethodTypes.POST
   }
 }
 
@@ -81,5 +93,8 @@ export const {
   createBrand,
   postProductMedia,
   getAllProducts,
-  getAllProductMedia
+  getAllProductMedia,
+  updateCategory,
+  deleteCategory,
+  postCategory
 } = appAPI

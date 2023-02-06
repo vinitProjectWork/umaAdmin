@@ -1,77 +1,177 @@
 import React, { useMemo } from "react"
-import DataTable from "react-data-table-component"
 import Filters from "../../components/Filters/Filters"
 import { useNavigate } from "react-router-dom"
 import Table from "../../components/Table/Table"
+import { useSelector } from "react-redux"
+import { useState } from "react"
+import { DeleteMini, EditMini } from "../../utils/icons"
+import Tabs from "../../components/Tabs/Tabs"
+import { baseURL } from "../../utils/http"
+import Modal from "../../components/Modal/Modal"
+import EditCategory from "./Components/EditCategory"
+import DeleteCategory from "./Components/DeleteCategory"
+import { toast } from "react-toastify"
+import { DeleteSelectedCategory, UpdateCategory } from "../../services"
 
 const CategoryList = () => {
   const navigate = useNavigate()
+  const { allCategoryDump, allSubCategoryDump } = useSelector(
+    ({ category }) => category
+  )
+
+  const [action, setAction] = useState("")
+  const [open, setOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState({})
+  const [totalRows, setTotalRows] = useState(1)
+  const [perPage, setPerPage] = useState(10)
+  const [editedData, setEditedData] = useState({
+    isEdited: false,
+    name: "",
+    image: ""
+  })
+
+  const [tabsName, setTabsName] = useState(["Category", "Sub Category"])
+  const [selectedTab, setSelectedTab] = useState("Category")
+
+  const handlePageChange = (page) => {
+    setPerPage(page)
+    getData(page)
+  }
+
+  const handlePerRowsChange = (rows) => {
+    setTotalRows(rows)
+  }
+
   const columns = useMemo(
     () => [
       {
-        name: "Category name",
-        selector: (row) => row.category_name,
+        name:
+          selectedTab === "Category" ? "Category name" : "Sub Category Name",
+        selector: (row) => row.attributes.name,
         sortable: true
       },
       {
-        name: "Status",
-        selector: (row) => row.status,
-        sortable: true,
-        cell: (row) => (
-          <span
-            className={`${
-              row.status === "out_of_stock"
-                ? "font-medium text-red-500"
-                : "font-medium text-green-500"
-            }`}
-          >
-            {row.status.split("_").join(" ").toUpperCase()}
-          </span>
-        )
-      },
-      {
         name: "Images",
-        selector: (row) => row.address_1,
-        sortable: true,
+        selector: (row) =>
+          selectedTab === "Category"
+            ? row?.attributes?.image?.data?.attributes?.url
+            : row?.attributes?.image?.data[0]?.attributes?.url,
         cell: (row) => (
           <span>
-            <img src="" alt="images" />
+            <img
+              src={
+                selectedTab === "Category"
+                  ? baseURL + row?.attributes?.image?.data?.attributes?.url
+                  : baseURL + row?.attributes?.image?.data[0]?.attributes?.url
+              }
+              alt={
+                selectedTab === "Category"
+                  ? row?.attributes?.image?.data?.attributes?.name
+                  : row?.attributes?.image?.data[0]?.attributes?.name
+              }
+              className="w-10 h-10"
+            />
           </span>
         )
       },
       {
         name: "Action",
-        selector: (row) => row.action
+        selector: (row) => row.action,
+        cell: (row) => (
+          <div className="flex justify-between gap-2">
+            <span
+              onClick={() => handleAction("edit", row)}
+              className="cursor-pointer"
+            >
+              <EditMini />
+            </span>
+            <span
+              onClick={() => handleAction("delete", row)}
+              className="cursor-pointer"
+            >
+              <DeleteMini />
+            </span>
+          </div>
+        )
       }
     ],
-    []
+    [selectedTab]
   )
-  const data = [
-    {
-      id: 1,
-      category_name: "Hard case",
-      status: "in_stock",
-      images: "",
-      action: "Edit | Delete"
-    },
-    {
-      id: 2,
-      category_name: "Soft case",
-      status: "out_of_stock",
-      images: "",
-      action: "Edit | Delete"
-    },
-    {
-      id: 2,
-      category_name: "Glass case",
-      status: "out_of_stock",
-      images: "",
-      action: "Edit | Delete"
+
+  const handleAction = (type, row) => {
+    setSelectedRow(row)
+    if (type === "edit") {
+      editCategory(type)
+    } else {
+      deleteCategory(type)
     }
-  ]
+  }
+
+  const editCategory = (type) => {
+    setAction(type)
+    setOpen(true)
+  }
+
+  const deleteCategory = (type) => {
+    setAction(type)
+    setOpen(true)
+  }
+
+  const handleSaveAction = async (type) => {
+    if (type === "edit") {
+      const { id } = selectedRow
+      const { name, image } = editedData
+
+      const formData = new FormData()
+      if (name !== "") formData.append("data", JSON.stringify({ name }))
+      if (image !== "") {
+        formData.append("files.image", image[0], image[0].name)
+      }
+
+      UpdateCategory(id, formData)
+        .then((resp) => {
+          toast.success("Category updated successfull")
+        })
+        .catch((err) => toast.error("something went wrong"))
+        .finally(() => setOpen(false))
+    } else {
+      DeleteSelectedCategory({ id: selectedRow.id })
+        .then((resp) => toast.success("Category deleted successfully!"))
+        .catch((err) => toast.error("something went wrong"))
+        .finally(() => setOpen(false))
+    }
+  }
 
   return (
     <>
+      {open ? (
+        <Modal
+          open={open}
+          setOpen={setOpen}
+          title={action === "edit" ? "Edit Category" : "Delete Category"}
+          children={
+            action === "edit" ? (
+              <EditCategory
+                data={selectedRow}
+                selectedTab={selectedTab}
+                setEditedData={setEditedData}
+                editedData={editedData}
+              />
+            ) : (
+              <DeleteCategory data={selectedRow} />
+            )
+          }
+          button={
+            <button
+              type="button"
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-indigo-300 bg-indigo-500 px-4 py-2 text-base font-medium text-gray-100 outline-none shadow-sm hover:bg-indigo-600 duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => handleSaveAction()}
+            >
+              {action === "edit" ? "Save" : "Delete"}
+            </button>
+          }
+        />
+      ) : null}
       <div>
         <div className="sm:px-6 w-full">
           <div className="px-4 md:px-10 py-4 md:py-7">
@@ -93,10 +193,29 @@ const CategoryList = () => {
 
           <Filters />
 
-          <div className="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
-            <div className="shadow-md px-3 my-3">
-              <Table columns={columns} data={data} />
-            </div>
+          <div className="py-4 md:py-7 px-4 md:px-8 xl:px-10">
+            <Tabs
+              tabsName={tabsName}
+              setSelectedTab={setSelectedTab}
+              selectedTab={selectedTab}
+            />
+            {selectedTab === "Category" ? (
+              <Table
+                columns={columns}
+                data={allCategoryDump?.data}
+                paginationData={allCategoryDump?.meta}
+                handlePerRowsChange={(e) => handlePerRowsChange(e)}
+                handlePageChange={(e) => handlePageChange(e)}
+              />
+            ) : (
+              <Table
+                columns={columns}
+                data={allSubCategoryDump?.data}
+                paginationData={allSubCategoryDump?.meta}
+                handlePerRowsChange={(e) => handlePerRowsChange(e)}
+                handlePageChange={(e) => handlePageChange(e)}
+              />
+            )}
           </div>
         </div>
       </div>

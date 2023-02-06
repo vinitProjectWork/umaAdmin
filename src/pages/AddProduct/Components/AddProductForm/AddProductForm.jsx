@@ -1,6 +1,5 @@
 import Editor from "../../../../components/Editor/Editor"
 const AddProductForm = ({ setData, data }) => {
-  console.log(data)
   return (
     <div className="bg-white py-6 mb-6">
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
