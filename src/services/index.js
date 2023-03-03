@@ -2,6 +2,7 @@ import { formToJSON } from "axios";
 import {
   createBrand,
   deleteBrand,
+  deleteCategory,
   deleteModel,
   editBrand,
   editModel,
@@ -12,6 +13,7 @@ import {
   getAllProducts,
   getProductById,
   getAllSubCategory,
+  postCategory,
   postProduct,
   postProductMedia,
   updateCategory,
@@ -189,9 +191,11 @@ export const GetAllSubCategories = async () => {
 
 // Get All Categories
 // ?pagination[page]=1&pagination[pageSize]=10
-
-export const GetAllModelsList = async ({ perPage, totalRows }) => {
-  const paginationUrl = `?pagination[page]=${totalRows}&pagination[pageSize]=${perPage}`
+// {
+//   perPage, totalRows
+// }
+export const GetAllModelsList = async () => {
+  // const paginationUrl = `?pagination[page]=${totalRows}&pagination[pageSize]=${perPage}`
   try {
     const { data } = await http.get(getAllModels.endPoint, {
       withCredentials: true,

@@ -1,4 +1,8 @@
 export const initialState = {
   allCategoryList: [],
-  allSubCategoryList: []
+  allSubCategoryList: [],
+  audioSubCategory: [],
+  accessoriesSubCategory: [],
+  allCategoryDump: [],
+  allSubCategoryDump: []
 }

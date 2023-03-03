@@ -10,7 +10,6 @@ import Table from "../../components/Table/Table";
 import { allBrands, allBrandsDump } from "../../redux/slices/brands/brands";
 import { allModels } from "../../redux/slices/models/models";
 import {
-  GetAllModelsList,
   UpdateModel,
   DeleteSelectedModel,
   GetAllBrandList,
@@ -38,20 +37,6 @@ const ModelList = () => {
     setAllModelList(tempModels);
   }, [allBrandList]);
 
-  useLayoutEffect(() => {
-    getData(perPage, totalRows)
-  }, [])
-  
-  const getData = (perPage, totalRows = 10) => {
-    GetAllModelsList({ perPage, totalRows })
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allModels(resp))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!!"))
-  }
-
   const handlePageChange = (page) => {
     setPerPage(page);
   };
@@ -76,10 +61,16 @@ const ModelList = () => {
         selector: (row) => row.action,
         cell: (row) => (
           <div className="flex justify-between gap-2">
-            <span onClick={() => handleAction("edit", row)}>
+            <span
+              onClick={() => handleAction("edit", row)}
+              className="cursor-pointer"
+            >
               <EditMini />
             </span>
-            <span onClick={() => handleAction("delete", row)}>
+            <span
+              onClick={() => handleAction("delete", row)}
+              className="cursor-pointer"
+            >
               <DeleteMini />
             </span>
           </div>

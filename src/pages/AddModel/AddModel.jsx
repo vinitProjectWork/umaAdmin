@@ -22,54 +22,11 @@ const AddModel = () => {
     setAllCompanyList(tempCompany);
   }, [allBrandList]);
 
-  useEffect(() => {
-    GetAllBrandList()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          const _data = resp.data.map((item) => {
-            return {
-              label: item.attributes.name,
-              value: item.id
-            }
-          })
-          dispatch(allBrands([..._data]))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!"))
-  }, [])
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-
-  const handleUploadFiles = (files) => {
-    console.log("files", files)
-    const uploaded = [...uploadedFiles]
-    let limitExceeded = false
-    files.some((file) => {
-      if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        uploaded.push(file)
-        if (uploaded.length === MAX_COUNT) setFileLimit(true)
-        if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`)
-          setFileLimit(false)
-          limitExceeded = true
-          return true
-        }
-      }
-    })
-    console.log(uploaded)
-    if (!limitExceeded) setUploadedFiles(uploaded)
-  }
-
-  const handleFileEvent = (e) => {
-    console.log("event", e)
-    const chosenFiles = Array.prototype.slice.call(e.target.files)
-    console.log("here", chosenFiles)
-    handleUploadFiles(chosenFiles)
-  }
 
   const createModel = (data) => {
     const _data = {

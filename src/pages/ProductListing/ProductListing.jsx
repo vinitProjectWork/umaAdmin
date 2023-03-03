@@ -85,19 +85,6 @@ export default function ProductListing() {
 
   const { productList } = useSelector(({ product }) => product);
 
-  console.log(productList)
-
-  useLayoutEffect(() => {
-    //all prodcts
-    GetAllProducts()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allProductList(resp.data))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!"))
-  }, [])
-
   const handleAddProduct = () => {
     navigate("/product");
   };

@@ -10,4 +10,4 @@ const slice = createSlice({ name: "brands", initialState, reducers })
 export default slice.reducer
 
 // Actions
-export const { allBrands } = slice.actions
+export const { allBrands, allBrandsDump } = slice.actions

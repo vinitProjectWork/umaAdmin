@@ -13,5 +13,9 @@ export default slice.reducer
 export const {
   // System Settings
   allCategory,
+  allCategoryDump,
   allSubCategory,
+  allSubCategoryDump,
+  audioSubCategory,
+  accessoriesSubCategory
 } = slice.actions

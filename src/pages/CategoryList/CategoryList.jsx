@@ -51,22 +51,6 @@ const CategoryList = () => {
         sortable: true,
       },
       {
-        name: "Status",
-        selector: (row) => row.status,
-        sortable: true,
-        cell: (row) => (
-          <span
-            className={`${
-              row.status === "out_of_stock"
-                ? "font-medium text-red-500"
-                : "font-medium text-green-500"
-            }`}
-          >
-            {row.status.split("_").join(" ").toUpperCase()}
-          </span>
-        )
-      },
-      {
         name: "Images",
         selector: (row) => row?.image?.url,
         cell: (row) => (
@@ -210,10 +194,29 @@ const CategoryList = () => {
 
           <Filters />
 
-          <div className="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
-            <div className="shadow-md px-3 my-3">
-              <Table columns={columns} data={data} />
-            </div>
+          <div className="py-4 md:py-7 px-4 md:px-8 xl:px-10">
+            <Tabs
+              tabsName={tabsName}
+              setSelectedTab={setSelectedTab}
+              selectedTab={selectedTab}
+            />
+            {selectedTab === "Category" ? (
+              <Table
+                columns={columns}
+                data={allCategoryDump?.data}
+                paginationData={allCategoryDump?.meta}
+                handlePerRowsChange={(e) => handlePerRowsChange(e)}
+                handlePageChange={(e) => handlePageChange(e)}
+              />
+            ) : (
+              <Table
+                columns={columns}
+                data={allSubCategoryDump?.data}
+                paginationData={allSubCategoryDump?.meta}
+                handlePerRowsChange={(e) => handlePerRowsChange(e)}
+                handlePageChange={(e) => handlePageChange(e)}
+              />
+            )}
           </div>
         </div>
       </div>

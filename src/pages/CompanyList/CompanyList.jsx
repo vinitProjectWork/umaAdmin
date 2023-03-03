@@ -26,20 +26,6 @@ const CompanyList = () => {
   const [selectedRow, setSelectedRow] = useState({});
   const [editedData, setEditedData] = useState({});
 
-  useLayoutEffect(() => {
-    getData(perPage, totalRows)
-  }, [])
-
-  const getData = () => {
-    GetAllBrandList()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          dispatch(allBrands(resp))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong!"))
-  }
-
   const handlePageChange = (page) => {
     setPerPage(page);
     // loadData();
@@ -81,10 +67,16 @@ const CompanyList = () => {
         selector: (row) => row.action,
         cell: (row) => (
           <div className="flex justify-between gap-2">
-            <span onClick={() => handleAction("edit", row)}>
+            <span
+              onClick={() => handleAction("edit", row)}
+              className="cursor-pointer"
+            >
               <EditMini />
             </span>
-            <span onClick={() => handleAction("delete", row)}>
+            <span
+              onClick={() => handleAction("delete", row)}
+              className="cursor-pointer"
+            >
               <DeleteMini />
             </span>
           </div>
@@ -197,8 +189,8 @@ const CompanyList = () => {
             <div className="shadow-md px-3 my-3">
               <Table
                 columns={columns}
-                data={allBrandList?.data}
-                paginationData={allBrandList?.meta}
+                data={allBrandsDump?.data}
+                paginationData={allBrandsDump?.meta}
                 handlePerRowsChange={(e) => handlePerRowsChange(e)}
                 handlePageChange={(e) => handlePageChange(e)}
               />
