@@ -1,46 +1,104 @@
-import React, { useState } from "react"
-import DataTable from "react-data-table-component"
-import Modal from "../../components/Modal/Modal"
-import Filters from "../../components/Filters/Filters"
-import Table from "../../components/Table/Table"
+import React, { useCallback, useEffect, useState } from "react";
+import Table from "../../components/Table/Table";
+import { GetAllOrders, ModifyOrderStatus } from "../../services";
+import { toast } from "react-toastify";
+import Tabs from "../../components/Tabs/Tabs";
+import { useDispatch, useSelector } from "react-redux";
+import { allOrdersDump } from "../../redux/slices/orders/orders";
 
 const OrderList = () => {
-  const [open, setOpen] = useState(false)
+  const dispatch = useDispatch();
+  const { allOrders } = useSelector(({ orders }) => orders);
+
+  const [tabsName, setTabsName] = useState([
+    "cart",
+    "Pending",
+    "Placed",
+    "Confirmed",
+    "InProgress",
+  ]);
+  const [selectedTab, setSelectedTab] = useState("Pending");
+
+  useEffect(() => {
+    fileterOrders();
+  }, [selectedTab]);
+
   const columns = [
     {
-      name: "Description",
-      selector: (row) => row.title
+      name: "Id",
+      selector: (row) => row.id,
     },
     {
-      name: "Quantity",
-      selector: (row) => row.quantity
+      name: "Details",
+      selector: (row) => row.orderDetails,
+      cell: (row) => format_OrderDetails(row),
     },
     {
-      name: "Date",
-      selector: (row) => row.date
+      name: "Product Price",
+      selector: (row) => row.productAmount,
+    },
+    {
+      name: "Order Price",
+      selector: (row) => row.orderAmount,
+    },
+    {
+      name: "Delivery Price",
+      selector: (row) => row.deliveryCharges,
     },
     {
       name: "Action",
-      selector: (row) => row.action
-    }
-  ]
-
-  const data = [
-    {
-      id: 1,
-      title: "Pixel 4a soft case",
-      quantity: "24",
-      date: "23/01/2022",
-      action: "View Summary"
+      cell: (row) => (
+        <div>
+          <select
+            className="border-2 rounded-md shadow-sm border-indigo-500 p-1"
+            onChange={(e) => handleStatusChange(e.target.value, row.id)}
+            value={selectedTab}
+          >
+            <option value="cart">cart</option>
+            <option value="Pending">Pending</option>
+            <option value="Placed">Placed</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="InProgress">InProgress</option>
+          </select>
+        </div>
+      ),
     },
-    {
-      id: 1,
-      title: "Oneplus 9RT glass back case",
-      quantity: "50",
-      date: "01/01/2022",
-      action: "View Summary"
-    }
-  ]
+  ];
+
+  const format_OrderDetails = (row) => {
+    const _parsedData = JSON.parse(row?.orderDetails);
+    return (
+      <div className="flex flex-col gap-1 p-1">
+        <img src={_parsedData?.image} className="w-8 h-8 border-2" />
+        <p className="text-xs">{_parsedData?.label}</p>
+        <p>Per pcs price:{_parsedData?.productPrice}</p>
+      </div>
+    );
+  };
+
+  const fileterOrders = useCallback(() => {
+    GetAllOrders(selectedTab)
+      .then((resp) => {
+        dispatch(allOrdersDump(resp));
+      })
+      .catch((err) => {
+        toast.error("Something went wrong");
+      });
+  }, [selectedTab]);
+
+  const handleStatusChange = (status, id) => {
+    const data = {
+      id,
+      status,
+    };
+    ModifyOrderStatus(data)
+      .then((resp) => {
+        console.log(resp);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <>
@@ -54,10 +112,22 @@ const OrderList = () => {
             </div>
           </div>
 
-          <Filters />
+          <div className="w-full mx-5">
+            <Tabs
+              tabsName={tabsName}
+              setSelectedTab={setSelectedTab}
+              selectedTab={selectedTab}
+            />
+          </div>
+
+          {/* <Filters /> */}
           <div className="bg-white py-4 md:py-7 px-4 md:px-8 xl:px-10">
             <div className="shadow-md px-3 my-3">
-              <Table columns={columns} data={data} />
+              <Table
+                columns={columns}
+                data={allOrders?.data}
+                isSelectableRows={true}
+              />
             </div>
           </div>
         </div>
@@ -68,7 +138,7 @@ const OrderList = () => {
         </style>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default OrderList
+export default OrderList;

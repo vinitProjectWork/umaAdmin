@@ -1,27 +1,42 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import Logo from "../../asset/images/logo.png"
+import Logo from "../../asset/images/logo.png";
+import { LoginUser, RegisterUser } from "../../services";
+import { EyeIcon } from "../../utils/Icons";
 
 const Login = () => {
-  const navigate = useNavigate()
-  const [mobileNumber, setMobileNumber] = useState("")
-  const [processing, setProcessing] = useState(false)
+  const navigate = useNavigate();
+  const [processing, setProcessing] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    identifier: "",
+    password: "",
+  });
+  const [passwordVisibility, setPasswordVisibility] = useState(false);
 
-  const handleMobileNumber = (val) => {
-    const newVal = val.replace(/[^\d,]/g, "")
-    setMobileNumber(newVal)
-  }
+  const toggleVisibility = () => {
+    setPasswordVisibility((old) => !old);
+  };
 
-  const handleRegister = () => {
-    setProcessing(true)
+  const handleSubmit = () => {
+    setProcessing(true);
     setTimeout(() => {
-      setProcessing(false)
-      toast.success("Registration successfull!")
-      navigate("/verify-pattern")
-    }, 1500)
-  }
+      LoginUser({ userDetails })
+        .then((resp) => {
+          if (resp.flag) {
+            toast.success("OTP sent successfully!");
+            navigate("/verify-otp", {
+              state: { mobileNumber: userDetails?.identifier },
+            });
+          }
+        })
+        .catch((error) => {
+          toast.error("Something went wrong!");
+        });
+      setProcessing(false);
+    }, 1000);
+  };
 
   return (
     <div className="flex items-center bg-gradient-to-r from-red-100 via-purple-100 to-pink-100 justify-center px-4 h-screen sm:px-6 lg:px-8">
@@ -42,52 +57,76 @@ const Login = () => {
                 height="90"
                 className="aspect-auto object-fit object-center"
               />
-              {/* <svg
-                width="95"
-                height="94"
-                viewBox="0 0 95 94"
-                className="w-6 h-auto text-indigo-500"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M96 0V47L48 94H0V47L48 0H96Z" />
-              </svg>
-              Uma Enterprise */}
             </a>
           </div>
         </div>
         <div className="mt-8 space-y-6">
           <div className="flex w-full justify-center flex-col items-center gap-3">
-            <div className="text-xl font-bold">Enter Mobile Number</div>
-            <div className="text-center text-md font-normal text-slate-500">
-              Enter your 10-digit mobile number to receive the verification
-              code.
+            <div className="text-3xl font-bold">Login</div>
+          </div>
+
+          <div className="-space-y-px rounded-md shadow-sm">
+            <label htmlFor="mobile_number" className="font-semibold">
+              Enter Mobile Number
+            </label>
+            <div className="relative flex gap-2 w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+              <input
+                id="mobile_number"
+                name="mobile_number"
+                type="text"
+                autoComplete="new-password"
+                inputMode="numeric"
+                value={userDetails?.mobile_number}
+                onChange={(e) =>
+                  setUserDetails((state) => {
+                    return {
+                      ...state,
+                      identifier: e.target.value.replace(/[^\d,]/g, ""),
+                    };
+                  })
+                }
+                placeholder="Enter mobile number"
+                className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              />
             </div>
           </div>
-          <input type="hidden" name="remember" defaultValue="true" />
+
           <div className="-space-y-px rounded-md shadow-sm">
-            <div>
-              <label htmlFor="mobile-number">Mobile Number</label>
-              <div className="relative flex gap-2 w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
-                <div className="text-lg from-neutral-500">+91</div>
-                <input
-                  id="mobile-number"
-                  name="mobile-number"
-                  type="text"
-                  autoComplete="email"
-                  value={mobileNumber}
-                  required
-                  className="bg-transparent focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                  onChange={(e) => handleMobileNumber(e.target.value)}
-                />
+            <label htmlFor="password" className="font-semibold">
+              Enter Password
+            </label>
+            <div className="relative flex justify-between gap-2 w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+              <input
+                id="password"
+                name="password"
+                type={passwordVisibility ? "text" : "password"}
+                autoComplete="new-password"
+                inputMode="numeric"
+                value={userDetails?.pin}
+                onChange={(e) =>
+                  setUserDetails((state) => {
+                    return {
+                      ...state,
+                      password: e.target.value,
+                    };
+                  })
+                }
+                placeholder="Enter Password"
+                className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+              />
+              <div
+                onClick={() => toggleVisibility()}
+                className="cursor-pointer"
+              >
+                <EyeIcon />
               </div>
             </div>
           </div>
 
           <button
-            type="button"
+            type="submit"
             className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-4 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none"
-            onClick={() => handleRegister()}
+            onClick={() => handleSubmit()}
           >
             {processing ? (
               <>
@@ -95,13 +134,13 @@ const Login = () => {
               </>
             ) : null}
             <div className="grid-2 my-auto -mx-1">
-              {processing ? "Processing..." : "Login"}
+              {processing ? "Please wait..." : "Login"}
             </div>
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

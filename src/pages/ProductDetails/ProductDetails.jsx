@@ -1,113 +1,272 @@
-import { useCallback } from "react"
-import { useEffect } from "react"
-import { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import Modal from "../../components/Modal/Modal"
-import { baseURL } from "../../utils/http"
-import { CaretDownMini } from "../../utils/Icons"
-import ProductSpecification from "./Components/ProductSpecification"
-import ReturnPolicy from "./Components/ReturnPolicy"
+import { useCallback } from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import Slider from "react-slick";
+import { toast } from "react-toastify";
+import Modal from "../../components/Modal/Modal";
+// import { intoCart } from "../../redux/slices/cart/cart";
+import { GetProductById } from "../../services";
+import { baseURL } from "../../utils/http";
+import { CaretDownMini, ShareIcon } from "../../utils/Icons";
+import ProductSpecification from "./Components/ProductSpecification";
+import ReturnPolicy from "./Components/ReturnPolicy";
 
-// import ProductSpecification from "./Components/ProductSpecification"
-// import ReturnPolicy from "./Components/ReturnPolicy"
-
-const products = [
-  {
-    id: 1,
-    name: "Earthen Bottle",
-    href: "/product-details",
-    material: "Matt finish",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg",
-    imageAlt:
-      "Tall slender porcelain bottle with natural clay textured body and cork stopper."
-  },
-  {
-    id: 2,
-    name: "Nomad Tumbler",
-    href: "/product-details",
-    material: "Glass finish",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg",
-    imageAlt:
-      "Olive drab green insulated bottle with flared screw lid and flat top."
-  },
-  {
-    id: 3,
-    name: "Focus Paper Refill",
-    href: "/product-details",
-    material: "Silicon",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg",
-    imageAlt:
-      "Person using a pen to cross a task off a productivity paper card."
-  },
-  {
-    id: 4,
-    name: "Machined Mechanical Pencil",
-    href: "/product-details",
-    material: "Normal",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg",
-    imageAlt:
-      "Hand holding black machined steel mechanical pencil with brass tip and top."
-  }
-]
+const settings = {
+  dots: true,
+  infinite: true,
+  speed: 500,
+  autoplay: false,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        infinite: true,
+        dots: true,
+      },
+    },
+    {
+      breakpoint: 600,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+        initialSlide: 2,
+      },
+    },
+    {
+      breakpoint: 480,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      },
+    },
+  ],
+};
 
 const ProductDetails = () => {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const [isAdded, setIsAdded] = useState(false)
-  const [qty, setQty] = useState(1)
-  const [pincodeChecking, setPincodeChecking] = useState(false)
-  const [modalTitle, setModalTitle] = useState("")
-  const [selectedImage, setSelectedImage] = useState("")
-  const [addItem, setAddItem] = useState(false)
-  const location = useLocation()
-  const productDetails = location.state
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  // const { cartData } = useSelector(({ cart }) => cart);
+  const [open, setOpen] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const [pincodeChecking, setPincodeChecking] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
+  const [addItem, setAddItem] = useState({});
+  const [canAddToCart, setCanAddToCart] = useState(false);
+  const [totalAddedQty, setTotalAddedQty] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [selectedModalImage, setSelectedModalImage] = useState("");
+  const { id: productId } = useParams();
+  const [productDetails, setProductDetails] = useState({
+    name: "",
+    id: "",
+    originalPrice: "",
+    discountedPrice: "",
+    description: "",
+    moq: "",
+    modelDetailUpdated: "[{}]",
+    groupedModel: {},
+    details: "",
+    deliveryChargesOnline: "",
+    deliveryChargesOffline: "",
+    product_medias: [],
+  });
   const {
     name,
+    id,
     originalPrice,
     discountedPrice,
     description,
     moq,
     modelDetailUpdated,
-    details
-  } = productDetails.attributes
+    details,
+    deliveryChargesOnline,
+    deliveryChargesOffline,
+    product_medias,
+    media,
+    groupedModel,
+  } = productDetails;
 
   useEffect(() => {
-    if (qty === 0) {
-      setIsAdded(false)
-      setQty(0)
+    if (productId) {
+      GetProductById(productId)
+        .then((resp) => {
+          const model = JSON.parse(resp?.data?.modelDetailUpdated);
+          let groupedModel = model?.reduce(function (r, a) {
+            r[a.brand] = r[a.brand] || [];
+            r[a.brand].push(a);
+            return r;
+          }, Object.create(null));
+          const selectedcategory = {
+            label: resp?.data.category?.name,
+            value: resp?.data?.category?.id,
+          };
+          const media = resp?.data?.product_medias?.map((item) => {
+            return {
+              preview: baseURL + item?.media?.url,
+              size: item?.media?.size * 1000,
+              order: item?.order,
+              type: item?.media?.ext,
+              id: item?.id,
+            };
+          });
+          // const currentProductCartData = cartData?.items?.filter(
+          //   (item) => item.productId == productId
+          // );
+          // if (currentProductCartData.length > 0) {
+          //   let _addItem = {};
+          //   groupedModel = currentProductCartData[0]?.model?.reduce(function (
+          //     r,
+          //     a
+          //   ) {
+          //     r[a.brand] = r[a.brand] || [];
+          //     r[a.brand].push(a);
+          //     return r;
+          //   },
+          //   Object.create(null));
+          //   currentProductCartData[0]?.model?.map((item) => {
+          //     _addItem[item.value] = parseInt(item.addQty);
+          //   });
+          //   setAddItem(_addItem);
+          // }
+          setSelectedImage(media[0].preview);
+          setSelectedModalImage(media[0].preview);
+          setProductDetails({
+            ...resp?.data,
+            selectedcategory,
+            model,
+            groupedModel,
+            media: media.sort((a, b) => a.order - b.order),
+            product_medias: [],
+          });
+        })
+        .catch((err) => {
+          toast.error("Something went wrong");
+        });
     }
-  }, [qty])
+  }, [productId]);
 
   const handleModal = (title) => {
-    setOpen(true)
-    setModalTitle(title)
-  }
+    setOpen(true);
+    setModalTitle(title);
+  };
 
-  const handleAddProduct = () => {
-    setQty((old) => old + 1)
-  }
+  const handleAddItem = (item, type, currValue) => {
+    const { value } = item;
+    let moq = item.moq ?? productDetails.model_moq;
+    let tempAddItem = addItem;
+    if (type === 1) {
+      if (addItem[value]) {
+        tempAddItem[value] =
+          (addItem[value] > parseInt(moq) - 1
+            ? addItem[value]
+            : parseInt(moq)) + 1;
+      } else {
+        tempAddItem[value] = parseInt(moq);
+      }
+    } else if (type === 0) {
+      tempAddItem[value] =
+        addItem[value] && addItem[value] - 1 > parseInt(moq)
+          ? (addItem[value] ?? 1) - 1
+          : addItem[value] == parseInt(moq)
+          ? 0
+          : 0;
+    } else {
+      if (parseInt(moq) - 1 < parseInt(currValue)) {
+        tempAddItem[value] = parseInt(currValue);
+      } else {
+        tempAddItem[value] = parseInt(moq);
+      }
+    }
+    setAddItem({ ...tempAddItem });
+  };
 
-  const handleDecProduct = () => {
-    setQty((old) => old - 1)
-  }
+  useEffect(() => {
+    const sum = Object.values(addItem).reduce(
+      (a, b) => parseInt(a) + parseInt(b),
+      0
+    );
 
-  const handleAddItem = () => {
-    setAddItem(true)
-    setQty(1)
-  }
+    const _price = originalPrice * sum;
+    setTotalPrice(_price);
+    setTotalAddedQty(sum);
+    if (sum >= moq) {
+      setCanAddToCart(true);
+    }
+  }, [addItem]);
 
   const handleCheckPincode = () => {
-    setPincodeChecking(true)
+    setPincodeChecking(true);
     setTimeout(() => {
-      setPincodeChecking(false)
-    }, 1500)
-  }
+      setPincodeChecking(false);
+    }, 1500);
+  };
 
-  console.log(productDetails.attributes)
+  const handleAddToCart = () => {
+    const _parsedData = JSON.parse(modelDetailUpdated);
+    const _model = [];
+
+    //preparing model object
+    _parsedData.filter((item) => {
+      Object.entries(addItem).map((i) => {
+        if (parseInt(i[0]) === parseInt(item.value)) {
+          _model.push({ ...item, addQty: String(i[1]) });
+        }
+      });
+    });
+    const getTotal = (total, num) => {
+      const totalPrice =
+        parseFloat(num?.price ?? originalPrice) * parseInt(num?.addQty);
+      return total + totalPrice;
+    };
+
+    const getShippingTotalOffline = (total, num) => {
+      const totalPrice =
+        parseFloat(deliveryChargesOffline) * parseInt(num?.addQty);
+      return total + totalPrice;
+    };
+
+    const deliveryChargesOnline = (total, num) => {
+      const totalPrice =
+        parseFloat(deliveryChargesOnline) * parseInt(num?.addQty);
+      return total + totalPrice;
+    };
+
+    //preparing data
+    const _data = {
+      label: name,
+      image: media[0]?.preview,
+      productPrice: originalPrice,
+      productId: id,
+      productName: name,
+      model: _model,
+      totalPrice: _model?.reduce(getTotal, 0),
+      shippingOffline: _model?.reduce(getShippingTotalOffline, 0),
+      shippingOnline: _model?.reduce(deliveryChargesOnline, 0),
+    };
+
+    // dispatch(intoCart(_data));
+    toast.success("Product added into cart");
+    navigate("/shopping-cart");
+  };
+
+  const shareLink = () => {
+    if (navigator?.clipboard && window?.isSecureContext) {
+      navigator?.clipboard?.writeText(window.location.href);
+      toast.success("Linked copied successfully!");
+    }
+  };
 
   return (
     <>
@@ -117,7 +276,7 @@ const ProductDetails = () => {
           setOpen={setOpen}
           children={
             modalTitle === "Specification" ? (
-              <ProductSpecification data={productDetails.attributes} />
+              <ProductSpecification data={productDetails} />
             ) : (
               <ReturnPolicy />
             )
@@ -127,101 +286,41 @@ const ProductDetails = () => {
       ) : null}
       <div className="bg-white py-6 sm:py-8 lg:py-12">
         <div className="max-w-screen-xl px-4 md:px-8 mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="grid lg:grid-cols-5 gap-4">
-              <div className="flex lg:flex-col order-last lg:order-none gap-4">
-                {productDetails?.attributes.product_medias.data.map((media) => (
-                  <div className="bg-gray-100 rounded-lg overflow-hidden">
-                    {media.attributes.media.data.attributes.ext === ".mp4" ? (
-                      <video
-                        src={
-                          baseURL + media.attributes.media.data.attributes.url
-                        }
-                        onClick={() =>
-                          setSelectedImage(
-                            baseURL + media.attributes.media.data.attributes.url
-                          )
-                        }
-                        // autoPlay
+          <Slider {...settings} easing="linear">
+            {productDetails?.media?.map((image, index) => {
+              return (
+                <div key={index}>
+                  {image.type === ".mp4" ? (
+                    <video autoPlay className="h-80 w-full object-contain">
+                      <source
+                        src={image.preview + "#t=0.001"}
+                        type="video/mp4"
                       />
-                    ) : (
-                      <img
-                        src={
-                          baseURL + media.attributes.media.data.attributes.url
-                        }
-                        loading="lazy"
-                        alt="Photo by U&E"
-                        className="w-full h-full object-cover object-center"
-                        onClick={() =>
-                          setSelectedImage(
-                            baseURL + media.attributes.media.data.attributes.url
-                          )
-                        }
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="lg:col-span-4 bg-gray-100 rounded-lg overflow-hidden relative">
-                {(
-                  selectedImage ||
-                  baseURL +
-                    productDetails?.attributes.product_medias.data[0]
-                      ?.attributes.media.data.attributes.url
-                ).includes(".mp4") ? (
-                  <video
-                    src={
-                      selectedImage ||
-                      baseURL +
-                        productDetails?.attributes.product_medias.data[0]
-                          ?.attributes.media.data.attributes.url
-                    }
-                    autoPlay
-                  />
-                ) : (
-                  <img
-                    src={
-                      selectedImage ||
-                      baseURL +
-                        productDetails?.attributes.product_medias.data[0]
-                          ?.attributes.media.data.attributes.url
-                    }
-                    loading="lazy"
-                    alt="Photo by Himanshu Dewangan"
-                    className="w-full h-full object-cover object-center"
-                  />
-                )}
-
-                <span className="bg-red-500 text-white text-sm tracking-wider uppercase rounded-br-lg absolute left-0 top-0 px-3 py-1.5">
-                  sale
-                </span>
-
-                <a
-                  href="#"
-                  className="inline-block bg-white hover:bg-gray-100 focus-visible:ring ring-indigo-300 text-gray-500 active:text-gray-700 border text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 absolute right-4 top-4 px-3.5 py-3"
-                >
-                  {/* <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    </video>
+                  ) : (
+                    <img
+                      src={`${image.preview}`}
+                      className="h-80 w-full object-contain"
                     />
-                  </svg> */}
-                </a>
-              </div>
-            </div>
-
+                  )}
+                </div>
+              );
+            })}
+          </Slider>
+          <div className="grid md:grid-cols-2 gap-8 mt-5">
             <div className="md:py-8">
               <div className="mb-2 md:mb-3">
-                <span className="inline-block text-gray-500 mb-0.5">U & E</span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block text-gray-500 mb-0.5">
+                    U & E
+                  </span>
+                  <span
+                    onClick={() => shareLink()}
+                    className="cursor-pointer text-gray-600"
+                  >
+                    <ShareIcon />
+                  </span>
+                </div>
                 <h2 className="text-gray-800 text-2xl lg:text-3xl font-bold">
                   {name}
                 </h2>
@@ -253,12 +352,12 @@ const ProductDetails = () => {
                 <CaretDownMini />
               </div>
 
-              <div className="font-bold cursor-pointer my-5 flex items-center gap-1">
+              {/* <div className="font-bold cursor-pointer my-5 flex items-center gap-1">
                 <span onClick={() => handleModal("Return Policy")}>
                   7 days Return
                 </span>
                 <CaretDownMini />
-              </div>
+              </div> */}
 
               <div className="mb-4">
                 <div className="flex items-end gap-2">
@@ -287,9 +386,9 @@ const ProductDetails = () => {
                 >
                   <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
                   />
                 </svg>
@@ -314,95 +413,88 @@ const ProductDetails = () => {
                   </button>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
-                <p className="font-medium text-slate-700">Compatible Models</p>
-                {JSON.parse(modelDetailUpdated).map((item, index) => {
-                  return (
-                    <div className="flex flex-col" key={index}>
-                      {item.name}
-                    </div>
-                  )
-                })}
-                <div></div>
-              </div>
             </div>
           </div>
 
           <div className="border-t-4 w-full mt-2"></div>
 
-          <div className="flex flex-col w-full">
-            {JSON.parse(modelDetailUpdated).map((item, index) => {
-              return (
-                <div
-                  className="flex justify-between w-1/2 items-center gap-2 my-2"
-                  key={index}
-                >
-                  <div className="flex gap-2">
-                    {/* <div className="bg-gray-100 rounded-sm overflow-hidden">
-                      <img
-                        src="https://images.unsplash.com/flagged/photo-1571366992999-47669b775ef6?auto=format&q=75&fit=crop&w=80"
-                        loading="lazy"
-                        alt="Photo by Himanshu Dewangan"
-                        className="w-full h-full object-cover object-center"
-                      />
-                    </div> */}
-                    <div>
-                      <p>{item.name}</p>
-                      <p className="text-slate-600">Min Qty: {item.moq}pc</p>
-                      <p className="font-medium">Price : ₹ {item.price}</p>
-                    </div>
-                  </div>
-
-                  {addItem && qty > 0 ? (
-                    <div className="w-20 h-8 flex border rounded overflow-hidden">
-                      <input
-                        type="text"
-                        value={qty}
-                        min={0}
-                        className="w-full focus:ring ring-inset ring-indigo-300 outline-none transition duration-100 px-4 py-2"
-                      />
-                      <div className="flex flex-col border-l divide-y">
-                        <button
-                          onClick={() => handleAddProduct()}
-                          className="w-6 flex justify-center items-center flex-1 bg-white hover:bg-gray-100 active:bg-gray-200 leading-none select-none transition duration-100"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => handleDecProduct()}
-                          className="w-6 flex justify-center items-center flex-1 bg-white hover:bg-gray-100 active:bg-gray-200 leading-none select-none transition duration-100"
-                        >
-                          -
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      className="bg-indigo-500 p-1 w-1/6 lg:w-1/12  text-slate-50 rounded-md"
-                      onClick={() => handleAddItem()}
+          {modelDetailUpdated && (
+            <div className="flex flex-col gap-3 w-full">
+              {[...JSON.parse(modelDetailUpdated)]?.map((item, index) => {
+                return (
+                  <>
+                    <div
+                      className="flex justify-between w-full lg:w-1/2 items-center gap-2 my-1"
+                      key={index}
                     >
-                      Add
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-            <div className="flex justify-end mt-5">
-              <button
-                className="bg-slate-500 p-1 w-1/4 lg:w-1/12 text-slate-50 rounded-md cursor-not-allowed"
-                disabled
-              >
-                Add to cart
-              </button>
+                      <div className="flex gap-2">
+                        <div className="rounded-sm overflow-hidden">
+                          <img
+                            src={selectedModalImage}
+                            alt="Photo by Himanshu Dewangan"
+                            className="h-14"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <p className="text-xl font-semibold">{item.label}</p>
+                          <p className="text-md font-semibold">
+                            Price : ₹{" "}
+                            {item.price ?? productDetails.originalPrice}
+                          </p>
+                          <p className="text-slate-600 text-sm">
+                            Min Qty: {item.moq ?? productDetails.model_moq} sets
+                          </p>
+                          <p className="text-slate-600 text-sm">
+                            Total MOQ: {moq} sets
+                          </p>
+                        </div>
+                      </div>
+                      {addItem[item.value] && addItem[item.value] > 0 ? (
+                        <div className="w-20 h-8 flex border rounded overflow-hidden">
+                          <button
+                            onClick={() => handleAddItem(item, 0)}
+                            className="w-8 p-1 border-r flex justify-center items-center flex-1 bg-white hover:bg-gray-100 active:bg-gray-200 leading-none select-none transition duration-100"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="text"
+                            value={addItem[item.value] + ""}
+                            min={item.moq}
+                            className="w-full text-center border-r focus:ring ring-inset ring-indigo-300 outline-none transition duration-100 px-2 py-2"
+                            onChange={(e) =>
+                              handleAddItem(item, 2, e.target.value)
+                            }
+                          />
+                          <button
+                            onClick={() => handleAddItem(item, 1)}
+                            className="w-8 p-1 flex justify-center items-center flex-1 bg-white hover:bg-gray-100 active:bg-gray-200 leading-none select-none transition duration-100"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="bg-white border-2 text-indigo-500 p-1 w-1/6 lg:w-1/6 rounded-md shadow-md"
+                          onClick={() => handleAddItem(item, 1)}
+                        >
+                          Add
+                        </button>
+                      )}
+                    </div>
+                    <div className="border-t-2 w-full"></div>
+                  </>
+                );
+              })}
             </div>
-          </div>
+          )}
+
           <div className="mt-5">
-            <div className="border-2"></div>
             <div className="my-2">
               <p className="font-bold text-lg my-3">Recommendation</p>
               <div className="lg:col-span-3">
                 {/* Replace with your content */}
-                <div className="mx-auto max-w-2xl lg:max-w-7xl">
+                {/* <div className="mx-auto max-w-2xl lg:max-w-7xl">
                   <div className="grid grid-cols-1 gap-y-4 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
                     {products.map((product) => (
                       <div
@@ -434,7 +526,6 @@ const ProductDetails = () => {
                                 {product.name}
                               </a>
                             </h3>
-                            {/* <p className="mt-1 text-sm text-gray-500">{product.color}</p> */}
                             <p className="font-medium text-md text-gray-900">
                               {product.price ?? "₹ 25"}
                             </p>
@@ -443,15 +534,46 @@ const ProductDetails = () => {
                       </div>
                     ))}
                   </div>
-                </div>
+                </div> */}
                 {/* /End replace */}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
-  )
-}
 
-export default ProductDetails
+      <div className="fixed flex justify-between items-center bottom-0 w-full">
+        {moq - totalAddedQty <= 0 ? null : (
+          <div
+            className={`${
+              totalAddedQty !== 0
+                ? "fixed bottom-12 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
+                : "fixed bottom-0 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
+            }`}
+          >
+            {`Add ${moq - totalAddedQty} pcs to proceed`}
+          </div>
+        )}
+
+        {totalAddedQty !== 0 ? (
+          <div className="fixed w-full items-center border-t-2 bottom-0 flex justify-between bg-slate-50 px-5">
+            <p className="font-semibold text-lg">{totalPrice} ₹</p>
+            <button
+              className={`${
+                moq <= totalAddedQty
+                  ? "bg-red-500 cursor-pointer"
+                  : "bg-slate-500 cursor-not-allowed"
+              } my-2 mx-4 float-right px-5 py-2  text-white text-sm font-bold tracking-wide rounded-full focus:outline-none`}
+              disabled={moq >= totalAddedQty}
+              onClick={() => handleAddToCart()}
+            >
+              Add to Cart
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+};
+
+export default ProductDetails;

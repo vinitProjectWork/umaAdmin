@@ -1,5 +1,5 @@
-import React from "react"
-import Editor from "../../components/Editor/Editor"
+import React from "react";
+import Editor from "../../components/Editor/Editor";
 
 const TermsAndCondition = () => {
   return (
@@ -11,10 +11,12 @@ const TermsAndCondition = () => {
           </p>
         </div>
 
-        <Editor />
+        <div className="mx-8">
+          <Editor />
+        </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TermsAndCondition
+export default TermsAndCondition;

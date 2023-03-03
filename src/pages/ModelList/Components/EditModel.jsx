@@ -2,12 +2,12 @@ import { useEffect } from "react"
 import { useState } from "react"
 
 const EditModel = ({ data, setEditedData }) => {
-  const { name } = data.attributes
+  const { label } = data
   const [updatedName, setUpdatedName] = useState("")
 
   useEffect(() => {
-    setUpdatedName(name)
-  }, [name])
+    setUpdatedName(label)
+  }, [label])
 
   const updateName = (value) => {
     setEditedData(value)

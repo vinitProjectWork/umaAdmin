@@ -1,21 +1,17 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import Editor from "../../components/Editor/Editor"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import Editor from "../../components/Editor/Editor";
 
-const MAX_COUNT = 5
+const MAX_COUNT = 5;
 
 const AddFAQ = () => {
-
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm()
+    formState: { errors },
+  } = useForm();
 
-
-  const createFAQ = (data) => {
-    console.log(data)
-  }
+  const createFAQ = (data) => {};
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
@@ -98,7 +94,7 @@ const AddFAQ = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddFAQ
+export default AddFAQ;

@@ -1,43 +1,40 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import Logo from "../../asset/images/logo.png"
+import Logo from "../../asset/images/logo.png";
+import { ResendOtp, VerifyOtp } from "../../services";
 
 const Otp = () => {
-  const navigate = useNavigate()
-  const [otp, setOtp] = useState({
-    one: "",
-    two: "",
-    three: "",
-    fourth: "",
-    fifth: "",
-    sixth: ""
-  })
-  const [verification, setVerification] = useState(false)
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleInputfocus = (elmnt) => {
-    if (elmnt.key === "Delete" || elmnt.key === "Backspace") {
-      const next = elmnt.target.tabIndex - 2
-      if (next > -1) {
-        elmnt.target.form.elements[next].focus()
-      }
-    } else {
-      const next = elmnt.target.tabIndex
-      if (next < 5) {
-        elmnt.target.form.elements[next].focus()
-      }
-    }
-  }
+  const [otp, setOtp] = useState("");
+  const [verification, setVerification] = useState(false);
 
   const verifyOtp = () => {
-    setVerification(true)
+    setVerification(true);
     setTimeout(() => {
-      setVerification(false)
-      toast.success("Otp verified successfully!")
-      navigate("/products")
-    }, 1500)
-  }
+      VerifyOtp({ otp, mobileNumber: location?.state?.mobileNumber })
+        .then((resp) => {
+          setVerification(false);
+          const { jwt, user } = resp;
+          localStorage.setItem("access_token", jwt);
+          localStorage.setItem("user", JSON.stringify(user));
+          toast.success("Otp verified successfully!");
+          navigate("/products");
+        })
+        .catch((error) => {
+          toast.error("Something went wrong!");
+        });
+    }, 1500);
+  };
+
+  // const handleResendOTP = () => {
+  //   ResendOtp()
+  //     .then((resp) => console.log(resp))
+  //     .catch((error) => console.log(error));
+  // };
 
   return (
     <div className="flex items-center bg-gradient-to-r from-red-100 via-purple-100 to-pink-100 justify-center px-4 h-screen sm:px-6 lg:px-8">
@@ -60,17 +57,6 @@ const Otp = () => {
                     height="90"
                     className="aspect-auto object-fit object-center"
                   />
-                  {/* <svg
-                width="95"
-                height="94"
-                viewBox="0 0 95 94"
-                className="w-6 h-auto text-indigo-500"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M96 0V47L48 94H0V47L48 0H96Z" />
-              </svg>
-              Uma Enterprise */}
                 </a>
               </div>
             </div>
@@ -78,111 +64,29 @@ const Otp = () => {
               <p>OTP Verification</p>
             </div>
             <div className="flex flex-row text-sm font-medium text-gray-400">
-              <p>We have sent a code to your mobile number</p>
+              <p>{`We have sent a code to your mobile number`}</p>
             </div>
           </div>
 
           <div className="flex flex-col space-y-8">
-            <form>
-              <div className="flex flex-row items-center justify-center gap-5 mx-auto w-full max-w-xs">
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="1"
-                    value={otp.one}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, one: e.target.value }
-                      })
-                    }
-                  />
-                </div>
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="2"
-                    value={otp.second}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, second: e.target.value }
-                      })
-                    }
-                  />
-                </div>
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="3"
-                    value={otp.third}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, third: e.target.value }
-                      })
-                    }
-                  />
-                </div>
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="4"
-                    value={otp.fourth}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, fourth: e.target.value }
-                      })
-                    }
-                  />
-                </div>
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="5"
-                    value={otp.fifth}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, fifth: e.target.value }
-                      })
-                    }
-                  />
-                </div>
-                <div className="w-12 h-12">
-                  <input
-                    className="w-full h-full font-bold flex flex-col items-center justify-center text-center px-3 outline-none rounded-xl border border-gray-500 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                    type="text"
-                    autoComplete="no-password"
-                    maxLength="1"
-                    tabIndex="6"
-                    value={otp.sixth}
-                    onKeyUp={(e) => handleInputfocus(e)}
-                    onChange={(e) =>
-                      setOtp((state) => {
-                        return { ...state, sixth: e.target.value }
-                      })
-                    }
-                  />
-                </div>
+            <div className="-space-y-px rounded-md shadow-sm">
+              <label htmlFor="otp" className="font-semibold">
+                OTP
+              </label>
+              <div className="relative flex gap-2 w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                <input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  autoComplete="new-password"
+                  inputMode="numeric"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                />
               </div>
-            </form>
+            </div>
 
             <div className="flex flex-col space-y-5">
               <div>
@@ -197,28 +101,26 @@ const Otp = () => {
                     </>
                   ) : null}
                   <div className="grid-2 my-auto -mx-1">
-                    {verification ? "Verifying..." : "Verify Mobile Number"}
+                    {verification ? "Verifying..." : "Verify OTP"}
                   </div>
                 </button>
               </div>
 
-              <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
+              <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500 cursor-pointer">
                 <p>Didn't recieve code?</p>{" "}
-                <a
-                  className="flex flex-row items-center text-blue-600"
-                  href="http://"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <div
+                  className="font-semibold text-indigo-500"
+                  onClick={() => handleResendOTP()}
                 >
                   Resend
-                </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Otp
+export default Otp;

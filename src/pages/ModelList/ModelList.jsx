@@ -1,36 +1,42 @@
-import React from "react"
-import { useMemo } from "react"
-import { useState } from "react"
-import { useLayoutEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
-import Filters from "../../components/Filters/Filters"
-import Modal from "../../components/Modal/Modal"
-import Table from "../../components/Table/Table"
-import { allModels } from "../../redux/slices/models/models"
+import React, { useEffect } from "react";
+import { useMemo } from "react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Filters from "../../components/Filters/Filters";
+import Modal from "../../components/Modal/Modal";
+import Table from "../../components/Table/Table";
+import { allBrands, allBrandsDump } from "../../redux/slices/brands/brands";
+import { allModels } from "../../redux/slices/models/models";
 import {
   GetAllModelsList,
   UpdateModel,
-  DeleteSelectedModel
-} from "../../services"
-import { EditMini, DeleteMini } from "../../utils/icons"
-import DeleteModel from "./Components/DeleteModel"
-import EditModel from "./Components/EditModel"
+  DeleteSelectedModel,
+  GetAllBrandList,
+  GetAllModelsList,
+} from "../../services";
+import { EditMini, DeleteMini } from "../../utils/icons";
+import DeleteModel from "./Components/DeleteModel";
+import EditModel from "./Components/EditModel";
 
 const ModelList = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const dispatch = useDispatch()
+  const { allBrandList } = useSelector(({ brands }) => brands);
 
-  const { allModelList } = useSelector(({ models }) => models)
+  const [action, setAction] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState({});
+  const [editedData, setEditedData] = useState("");
+  const [allModelList, setAllModelList] = useState([]);
+  const [totalRows, setTotalRows] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
-  const [action, setAction] = useState("")
-  const [open, setOpen] = useState(false)
-  const [selectedRow, setSelectedRow] = useState({})
-  const [editedData, setEditedData] = useState("")
-  const [totalRows, setTotalRows] = useState(1)
-  const [perPage, setPerPage] = useState(10)
+  useEffect(() => {
+    let tempModels = [...allBrandList.map((item) => item.options)].flat();
+    setAllModelList(tempModels);
+  }, [allBrandList]);
 
   useLayoutEffect(() => {
     getData(perPage, totalRows)
@@ -47,24 +53,23 @@ const ModelList = () => {
   }
 
   const handlePageChange = (page) => {
-    setPerPage(page)
-    getData(page)
-  }
+    setPerPage(page);
+  };
 
   const handlePerRowsChange = (rows) => {
-    setTotalRows(rows)
-  }
+    setTotalRows(rows);
+  };
 
   const columns = useMemo(
     () => [
       {
         name: "Name",
-        selector: (row) => row.attributes.name,
-        grow: 2
+        selector: (row) => row.label,
+        grow: 2,
       },
       {
         name: "Status",
-        cell: () => <span>Active</span>
+        cell: () => <span>Active</span>,
       },
       {
         name: "Action",
@@ -78,54 +83,48 @@ const ModelList = () => {
               <DeleteMini />
             </span>
           </div>
-        )
-      }
+        ),
+      },
     ],
-    []
-  )
+    [allBrandList]
+  );
 
   const handleAction = (type, row) => {
-    setSelectedRow(row)
+    setSelectedRow(row);
     if (type === "edit") {
-      editCategory(type)
+      editCategory(type);
     } else {
-      deleteCategory(type)
+      deleteCategory(type);
     }
-  }
+  };
 
   const editCategory = (type) => {
-    setAction(type)
-    setOpen(true)
-  }
+    setAction(type);
+    setOpen(true);
+  };
 
   const deleteCategory = (type) => {
-    setAction(type)
-    setOpen(true)
-  }
+    setAction(type);
+    setOpen(true);
+  };
 
   const handleSaveAction = () => {
     if (action === "edit") {
-      UpdateModel({ id: selectedRow.id, value: editedData })
+      UpdateModel({ id: selectedRow.value, value: editedData })
         .then((resp) => {
-          setOpen(false)
-          toast.success("Model updated successfully!")
+          setOpen(false);
+          toast.success("Model updated successfully!");
         })
-        .catch((err) => toast.error("something went wrong"))
-        .finally(() => {
-          getData(perPage, totalRows)
-        })
+        .catch((err) => toast.error("something went wrong"));
     } else {
-      DeleteSelectedModel({ id: selectedRow.id })
+      DeleteSelectedModel({ id: selectedRow.value })
         .then((resp) => {
-          setOpen(false)
-          toast.success("Model deleted successfully!")
+          setOpen(false);
+          toast.success("Model deleted successfully!");
         })
-        .catch((err) => toast.error("something went wrong"))
-        .finally(() => {
-          getData(perPage, totalRows)
-        })
+        .catch((err) => toast.error("something went wrong"));
     }
-  }
+  };
 
   return (
     <>
@@ -176,8 +175,8 @@ const ModelList = () => {
             <div className="shadow-md px-3 my-3">
               <Table
                 columns={columns}
-                data={allModelList?.data}
-                paginationData={allModelList?.meta}
+                data={allModelList}
+                paginationData={allModelList?.length}
                 handlePerRowsChange={(e) => handlePerRowsChange(e)}
                 handlePageChange={(e) => handlePageChange(e)}
               />
@@ -186,7 +185,7 @@ const ModelList = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ModelList
+export default ModelList;

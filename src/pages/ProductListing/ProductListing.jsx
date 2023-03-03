@@ -1,39 +1,40 @@
-import { Fragment, useEffect, useState } from "react"
-import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react"
-import { XMarkIcon } from "@heroicons/react/24/outline"
+import { Fragment, useState } from "react";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
   FunnelIcon,
   MinusIcon,
-  PlusIcon
-} from "@heroicons/react/20/solid"
-import Select from "../../components/Select/Select"
-import Pagination from "../../components/Pagination/Pagination"
-import { useNavigate } from "react-router-dom"
-import Category from "../../components/Category/Category"
-import SlickSlider from "../../components/Slider/Slider"
-import { useLayoutEffect } from "react"
-import { GetAllProductMedia, GetAllProducts } from "../../services"
-import { toast } from "react-toastify"
-import { useDispatch, useSelector } from "react-redux"
-import { allProductList } from "../../redux/slices/product/product"
-import { baseURL } from "../../utils/http"
-import { EditMini } from "../../utils/icons"
+  PlusIcon,
+} from "@heroicons/react/20/solid";
+import Select from "../../components/Select/Select";
+import Pagination from "../../components/Pagination/Pagination";
+import { generatePath, useNavigate } from "react-router-dom";
+import Category from "../../components/Category/Category";
+import SlickSlider from "../../components/Slider/Slider";
+import { useSelector } from "react-redux";
+import { baseURL } from "../../utils/http";
+import Modal from "../../components/Modal/Modal";
+import DeleteProduct from "./Component/DeleteProduct";
+import { DeleteSelectedProduct } from "../../services";
+import { toast } from "react-toastify";
+
+import "./ProductListing.module.css";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", current: true },
   { name: "Best Rating", href: "#", current: false },
   { name: "Newest", href: "#", current: false },
   { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false }
-]
+  { name: "Price: High to Low", href: "#", current: false },
+];
 const subCategories = [
   { name: "Totes", href: "#" },
   { name: "Backpacks", href: "#" },
   { name: "Travel Bags", href: "#" },
   { name: "Hip Bags", href: "#" },
-  { name: "Laptop Sleeves", href: "#" }
-]
+  { name: "Laptop Sleeves", href: "#" },
+];
 const filters = [
   {
     id: "color",
@@ -44,8 +45,8 @@ const filters = [
       { value: "blue", label: "Blue", checked: true },
       { value: "brown", label: "Brown", checked: false },
       { value: "green", label: "Green", checked: false },
-      { value: "purple", label: "Purple", checked: false }
-    ]
+      { value: "purple", label: "Purple", checked: false },
+    ],
   },
   {
     id: "category",
@@ -55,8 +56,8 @@ const filters = [
       { value: "sale", label: "Sale", checked: false },
       { value: "travel", label: "Travel", checked: true },
       { value: "organization", label: "Organization", checked: false },
-      { value: "accessories", label: "Accessories", checked: false }
-    ]
+      { value: "accessories", label: "Accessories", checked: false },
+    ],
   },
   {
     id: "size",
@@ -67,21 +68,22 @@ const filters = [
       { value: "12l", label: "12L", checked: false },
       { value: "18l", label: "18L", checked: false },
       { value: "20l", label: "20L", checked: false },
-      { value: "40l", label: "40L", checked: true }
-    ]
-  }
-]
+      { value: "40l", label: "40L", checked: true },
+    ],
+  },
+];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(" ")
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function ProductListing() {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const navigate = useNavigate();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
 
-  const { productList } = useSelector(({ product }) => product)
+  const { productList } = useSelector(({ product }) => product);
 
   console.log(productList)
 
@@ -97,11 +99,39 @@ export default function ProductListing() {
   }, [])
 
   const handleAddProduct = () => {
-    navigate("/add-product")
-  }
+    navigate("/product");
+  };
 
+  const handleDeleteClick = (id) => {
+    setOpen(true);
+    setSelectedProductId(id);
+  };
+
+  const handleDeleteAction = () => {
+    DeleteSelectedProduct({ id: selectedProductId })
+      .then((resp) => toast.success("Product deleted successfully!"))
+      .catch((err) => toast.error("something went wrong"))
+      .finally(() => setOpen(false));
+  };
   return (
     <div className="bg-white">
+      {open ? (
+        <Modal
+          open={open}
+          setOpen={setOpen}
+          title={"Delete Category"}
+          children={<DeleteProduct />}
+          button={
+            <button
+              type="button"
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-indigo-300 bg-indigo-500 px-4 py-2 text-base font-medium text-gray-100 outline-none shadow-sm hover:bg-indigo-600 duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => handleDeleteAction()}
+            >
+              {"Delete"}
+            </button>
+          }
+        />
+      ) : null}
       <div className="mr-10 ml-10 mt-5">
         <SlickSlider />
       </div>
@@ -392,21 +422,28 @@ export default function ProductListing() {
               <div className="lg:col-span-3">
                 {/* Replace with your content */}
                 <div className="mx-auto max-w-2xl lg:max-w-7xl">
-                  <div className="grid grid-cols-1 gap-y-4 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
+                  <div className="grid grid-cols-2 gap-y-14 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
                     {productList.map((product, index) => (
-                      <span>
+                      <div>
                         <div
                           key={index}
-                          className="group relative flex flex-col lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md"
+                          className="group relative h-full flex flex-col lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md cursor-pointer"
+                          onClick={() =>
+                            navigate(
+                              generatePath("/product-details/:id", {
+                                id: product.id,
+                              })
+                            )
+                          }
                         >
-                          <div className="min-h-80 z-50 aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:aspect-none lg:h-80">
+                          <div className="min-h-80 aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:aspect-none lg:h-80">
                             <img
-                              src={`${baseURL}${product.attributes.product_medias.data[0]?.attributes.media.data.attributes.url}`}
+                              src={`${baseURL}${product?.product_medias?.[0]?.media?.url}`}
                               alt={product.imageAlt}
-                              className="h-full w-full object-cover object-center lg:h-full lg:w-full"
+                              className="h-full w-full object-fit object-center lg:h-full lg:w-full"
                             />
                           </div>
-                          <div className="mt-4 flex justify-center items-start flex-col px-1 w-full gap-3">
+                          <div className="mt-4 h-16 flex justify-center items-start flex-col px-1 w-full gap-3">
                             <div className="flex justify-center flex-col items-center w-full gap-2">
                               <h3 className="text-sm text-gray-700 text-center font-normal">
                                 <span
@@ -416,37 +453,33 @@ export default function ProductListing() {
                                 {"U&E"}
                               </h3>
                               <h3 className="text-gray-700 text-center font-bold text-md">
-                                <a
-                                  onClick={() =>
-                                    navigate("/product-details", {
-                                      state: product
-                                    })
-                                  }
-                                >
-                                  <span
-                                    aria-hidden="true"
-                                    className="absolute inset-0"
-                                  />
-                                  {product.attributes.name}
-                                </a>
+                                <p>{product?.name}</p>
                               </h3>
-                              {/* <p className="mt-1 text-sm text-gray-500">{product.color}</p> */}
                               <p className="font-medium text-md text-gray-900">
-                                {"₹ " + product.attributes.originalPrice}
+                                {"₹ " + product?.originalPrice}
                               </p>
                             </div>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate("/add-product", { state: product })
-                          }
-                          className="flex justify-center w-full mt-2 font-medium border-2"
-                        >
-                          Edit
-                        </button>
-                      </span>
+                        <div className="flex flex-row gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate("/product?id=" + product?.id)
+                            }
+                            className="flex justify-center w-full mt-2 font-medium border-2 p-1"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClick(product?.id)}
+                            className="flex justify-center w-1/4 mt-2 font-medium border-2 p-1"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -458,5 +491,5 @@ export default function ProductListing() {
         </main>
       </div>
     </div>
-  )
+  );
 }

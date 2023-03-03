@@ -38,11 +38,13 @@ const AddCompany = () => {
   }
 
   const createCompany = (data) => {
-    const _data = {
-      name: data.company_name,
-      logo: data.image
-    }
-    PostCompany({ ..._data })
+    const formData = new FormData()
+    formData.append("files.logo", data.image[0], data.image[0].name)
+    formData.append(
+      "data",
+      JSON.stringify({ name: data.company_name, })
+    )
+    PostCompany(formData)
       .then((resp) => {
         toast.success("Company created successfully!")
         navigate("/company-list")
@@ -101,7 +103,7 @@ const AddCompany = () => {
             />
             {errors.logo && (
               <p className="text-red-500 font-normal text-sm">
-                Logo name is required
+                Logo is required
               </p>
             )}
           </div>

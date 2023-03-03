@@ -3,7 +3,6 @@
   "description": "",
   "version": "0.1.0",
   "private": true,
-  "homepage": "./index.html",
   "author": {
     "name": "vinit-mendapara"
   },
@@ -14,22 +13,17 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^35.4.0",
-    "@ckeditor/ckeditor5-react": "^5.0.6",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@reduxjs/toolkit": "^1.9.1",
     "axios": "^1.2.6",
-    "i": "^0.3.7",
-    "npm": "^9.4.0",
     "react": "^18.2.0",
     "react-data-table-component": "^7.5.3",
     "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.42.1",
-    "react-image-magnify": "^2.7.4",
-    "react-pattern-lock": "^12.0.12",
+    "react-quill": "^2.0.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.6.2",
     "react-select": "^5.7.0",
@@ -38,13 +32,8 @@
     "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
     "@vitejs/plugin-react": "^3.0.1",
     "autoprefixer": "^10.4.13",
-    "jest": "^29.3.1",
-    "jest-environment-jsdom": "^29.3.1",
-    "postcss": "^8.4.20",
     "tailwindcss": "^3.2.4",
     "vite": "^4.0.4"
   }

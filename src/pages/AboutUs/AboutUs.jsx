@@ -1,5 +1,5 @@
-import React from "react"
-import Editor from "../../components/Editor/Editor"
+import React from "react";
+import Editor from "../../components/Editor/Editor";
 
 const AboutUs = () => {
   return (
@@ -10,11 +10,12 @@ const AboutUs = () => {
             About Us Editor
           </p>
         </div>
-
-        <Editor />
+        <div className="mx-8">
+          <Editor />
+        </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default AboutUs
+export default AboutUs;

@@ -1,125 +1,142 @@
-import { Fragment, useEffect } from "react"
-import { useLayoutEffect } from "react"
-import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useLocation } from "react-router-dom"
-import { toast } from "react-toastify"
-import SelectComponent from "../../components/Select/Select"
-import { allCategory } from "../../redux/slices/category/category"
+import { Fragment, useEffect } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import Select from "react-select";
+import { toast } from "react-toastify";
 import {
   CreateProduct,
-  GetAllCategories,
-  PostProductMedia
-} from "../../services"
-import { Details, Media, Mobile, Money } from "../../utils/icons"
-import AddProductForm from "./Components/AddProductForm/AddProductForm"
-import ModelsForm from "./Components/ModelsForm/ModelsForm"
-import PriceForm from "./Components/PriceForm/PriceForm"
-import UploadForm from "./Components/UploadForm/UploadForm"
+  GetProductById,
+  GetProductMediaById,
+  PostProductMedia,
+  UpdateProduct,
+} from "../../services";
+import { baseURL } from "../../utils/http";
+import { Details, Media, Mobile, Money } from "../../utils/icons";
+import AddProductForm from "./Components/AddProductForm/AddProductForm";
+import ModelsForm from "./Components/ModelsForm/ModelsForm";
+import PriceForm from "./Components/PriceForm/PriceForm";
+import UploadForm from "./Components/UploadForm/UploadForm";
 
 const STEPS = [
   { label: "Media", icon: Media },
   { label: "Details", icon: Details },
-  { label: "Models", icon: Mobile },
-  { label: "Price", icon: Money }
-]
+  { label: "Price", icon: Mobile },
+  { label: "Models", icon: Money },
+];
 
 const AddProduct = () => {
-  const dispatch = useDispatch()
-  const location = useLocation()
-
-  const { allCategoryList } = useSelector(({ category }) => category)
-  const { productMedia, mediaId } = useSelector(({ product }) => product)
-
-  const [data, setData] = useState({})
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const { allCategoryList } = useSelector(({ category }) => category);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [data, setData] = useState({});
+  const [search, setSearch] = useSearchParams();
+  const id = search.get("id");
 
   useEffect(() => {
-    if (location?.state) {
-      setData({ ...location?.state?.attributes, id: location?.state?.id })
-      setSelectedCategory(location?.state?.attributes?.category?.data?.id)
-    }
-  }, [location?.state])
-
-  useLayoutEffect(() => {
-    GetAllCategories()
-      .then((resp) => {
-        if (resp.data.length > 0) {
-          const _data = resp.data.map((item) => {
+    if (id) {
+      GetProductById(id)
+        .then((resp) => {
+          const model = resp?.data?.modelDetailUpdated;
+          const selectedcategory = {
+            label: resp?.data.category?.name,
+            value: resp?.data?.category?.id,
+          };
+          const media = resp?.data?.product_medias?.map((item) => {
             return {
-              label: item.attributes.name,
-              value: item.id
-            }
-          })
-          dispatch(allCategory([..._data]))
-        }
-      })
-      .catch((err) => toast.error("Something went wrong"))
-  }, [])
-
-  const handleNext = () => {
-    setCurrentIndex((old) => old + 1)
-  }
-
-  //next step
-  const handlePrevious = () => {
-    setCurrentIndex((old) => old - 1)
-  }
-
-  const productMediaUpload = (id) => {
-    const mediaData = []
-    let error = false
-    productMedia.map(async (media) => {
-      const formData = new FormData()
-      formData.append("files.media", media, media.name)
-      formData.append(
-        "data",
-        JSON.stringify({ order: media.order, product: id })
-      )
-      await PostProductMedia(formData)
-        .then(function (values) {
-          mediaData.push(values?.data?.id)
-          toast.success(`${media.name} uploaded successfully`)
+              preview: baseURL + item?.media?.url,
+              size: item?.media?.size * 1000,
+              order: item?.order,
+              type: item?.media?.ext,
+              id: item?.id,
+            };
+          });
+          const _sortedMedia = [...media].sort((a, b) => a.order - b.order);
+          // setData({ ...data, media: _sortedMedia });
+          setData({
+            ...resp?.data,
+            selectedcategory,
+            model,
+            media: _sortedMedia,
+          });
         })
         .catch((err) => {
-          error = true
-          toast.error("Something went wrong!")
-        })
-    })
-  }
-
-  // //create product
-  const createProduct = () => {
-    if (productMedia.length > 0) {
-      data.modelDetails = data.modelDetailUpdated = JSON.stringify(
-        data.model.map((item) => {
-          return {
-            name: item.label,
-            id: item.value,
-            moq: item.moq ?? data.moq,
-            price: item.price ?? data.price
-          }
-        })
-      )
-      data.originalPrice = data.price
-      console.log(data)
-      CreateProduct(data)
-        .then((resp) => {
-          productMediaUpload(resp.data.id)
-          resetForm()
-        })
-        .catch((err) => toast.error("Something went wrong"))
-    } else {
-      toast.error("Media is not selected.")
+          toast.error("Something went wrong");
+        });
     }
-  }
+  }, [id]);
 
-  //reset form
-  const resetForm = () => {
-    setSelectedCategory(null)
-    setCurrentIndex(0)
-  }
+  const productMediaUpload = async (id) => {
+    let medias = [];
+    data?.media?.map(async (media, index) => {
+      if (media instanceof File) {
+        const formData = new FormData();
+        formData.append("files.media", media, media.name);
+        formData.append(
+          "data",
+          JSON.stringify({ order: media.order, product: id })
+        );
+        await PostProductMedia(formData)
+          .then(async function (values) {
+            if (values) {
+              await GetProductMediaById(values?.data?.id).then((value) => {
+                medias.push({
+                  preview: baseURL + value?.data?.media?.url,
+                  size: value?.data?.media?.size * 1000,
+                  order: value?.data?.order,
+                  type: value?.data?.media?.ext,
+                  id: value?.data?.id,
+                });
+              });
+            }
+          })
+          .catch(() => {
+            toast.error("Something went wrong!");
+          });
+      } else {
+        medias.push({ ...media });
+      }
+      if (index + 1 === data?.media?.length) {
+        setData({ ...data, media: medias, id });
+      }
+    });
+  };
+
+  const createProduct = () => {
+    CreateProduct({ category: data.category, media: data.media })
+      .then((resp) => {
+        productMediaUpload(resp.data.id);
+      })
+      .catch(() => toast.error("Something went wrong"));
+  };
+
+  const updateProduct = () => {
+    UpdateProduct(data)
+      .then((resp) => {})
+      .catch(() => toast.error("Something went wrong"));
+  };
+
+  const handleNextStep = async (currentIndex) => {
+    if (currentIndex === 0 && data.id === undefined) {
+      createProduct();
+    } else {
+      const newMedia = data?.media.filter((item) => item instanceof File);
+      if (newMedia.length > 0) {
+        await productMediaUpload(id);
+      }
+      updateProduct();
+    }
+    if (currentIndex + 1 < STEPS.length) {
+      setCurrentIndex((old) => old + 1);
+    } else {
+      setCurrentIndex(0);
+      setData({});
+      toast.success(`Product Created successfully`);
+    }
+  };
+
+  const handlePrevStep = () => {
+    setCurrentIndex((old) => old - 1);
+  };
 
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
@@ -132,15 +149,20 @@ const AddProduct = () => {
 
         <div className="mx-4 p-4">
           <p className="mb-2">Select Category</p>
-          <SelectComponent
-            isStatic={true}
-            data={allCategoryList}
-            setSelectedCategory={setSelectedCategory}
-            selectedCategory={selectedCategory}
+          <Select
+            value={data.selectedcategory}
+            options={allCategoryList}
+            onChange={(value) =>
+              setData({
+                ...data,
+                category: value.value,
+                selectedcategory: value,
+              })
+            }
+            placeholder={"Select Category"}
           />
         </div>
-
-        {selectedCategory ? (
+        {data?.selectedcategory?.value && (
           <div className="p-2">
             <div className="mx-4 p-4">
               <div className="flex items-center">
@@ -169,54 +191,45 @@ const AddProduct = () => {
                         <div className="flex-auto border-t-2 transition duration-500 ease-in-out border-gray-300"></div>
                       )}
                     </Fragment>
-                  )
+                  );
                 })}
               </div>
             </div>
             <div className="mt-8 p-4">
               {currentIndex === 0 ? (
-                <UploadForm setData={setData} data={data} />
+                <UploadForm data={data} setData={setData} />
               ) : currentIndex === 1 ? (
-                <AddProductForm setData={setData} data={data} />
+                <AddProductForm data={data} setData={setData} />
               ) : currentIndex === 2 ? (
-                <ModelsForm setData={setData} data={data} />
+                <PriceForm data={data} setData={setData} />
               ) : (
-                <PriceForm setData={setData} data={data} />
+                <ModelsForm data={data} setData={setData} />
               )}
 
               <div className="flex p-2 mt-4">
                 {currentIndex === 0 ? null : (
                   <button
-                    onClick={() => handlePrevious()}
+                    onClick={() => handlePrevStep()}
                     className="text-base focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-blue-500 bg-blue-500 text-gray-100 border duration-200 ease-in-out border-blue-400 transition"
                   >
                     Previous
                   </button>
                 )}
                 <div className="flex-auto flex flex-row-reverse">
-                  {currentIndex === STEPS.length - 1 ? (
-                    <button
-                      onClick={() => createProduct()}
-                      className="text-base ml-2 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-indigo-600 bg-indigo-600 text-indigo-100 border duration-200 ease-in-out border-indigo-600 transition"
-                    >
-                      Add Product
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleNext()}
-                      className="text-base ml-2 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-indigo-600 bg-indigo-600 text-indigo-100 border duration-200 ease-in-out border-indigo-600 transition"
-                    >
-                      Next
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleNextStep(currentIndex)}
+                    className="text-base ml-2 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-indigo-600 bg-indigo-600 text-indigo-100 border duration-200 ease-in-out border-indigo-600 transition"
+                  >
+                    {currentIndex === STEPS.length - 1 ? "Add Product" : "Next"}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddProduct
+export default AddProduct;

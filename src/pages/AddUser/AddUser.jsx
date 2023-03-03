@@ -1,15 +1,13 @@
-import { useForm } from "react-hook-form"
+import { useForm } from "react-hook-form";
 
 const AddUser = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm()
+    formState: { errors },
+  } = useForm();
 
-  const createUser = (data) => {
-    console.log(data)
-  }
+  const createUser = (data) => {};
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
@@ -97,7 +95,7 @@ const AddUser = () => {
               placeholder="Enter address line 1"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("address_line_1", {
-                required: true
+                required: true,
               })}
             />
             {errors.address_line_1 && (
@@ -120,7 +118,7 @@ const AddUser = () => {
               placeholder="Enter address line 2"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("address_line_2", {
-                required: true
+                required: true,
               })}
             />
             {errors.address_line_2 && (
@@ -143,7 +141,7 @@ const AddUser = () => {
               placeholder="Enter city/district"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("city", {
-                required: true
+                required: true,
               })}
             />
             {errors.city && (
@@ -165,7 +163,7 @@ const AddUser = () => {
               placeholder="Enter state"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("state", {
-                required: true
+                required: true,
               })}
             />
             {errors.state && (
@@ -187,7 +185,7 @@ const AddUser = () => {
               placeholder="Enter pincode"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("pincode", {
-                required: true
+                required: true,
               })}
             />
             {errors.pincode && (
@@ -209,7 +207,7 @@ const AddUser = () => {
               placeholder="Enter GST number"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
               {...register("gstin", {
-                required: true
+                required: true,
               })}
             />
             {errors.gstin && (
@@ -231,7 +229,7 @@ const AddUser = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddUser
+export default AddUser;

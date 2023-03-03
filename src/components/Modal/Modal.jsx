@@ -2,6 +2,7 @@ import { Fragment, useRef } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 
 const Modal = ({ open, setOpen, children, title, button }) => {
+  
   const cancelButtonRef = useRef(null)
 
   return (

@@ -11,10 +11,12 @@ const PrivacyPolicy = () => {
           </p>
         </div>
 
-        <Editor />
+        <div className="mx-8">
+          <Editor />
+        </div>
       </div>
     </>
-  )
+  );
 }
 
 export default PrivacyPolicy

@@ -1,36 +1,30 @@
-import React, { useState } from "react"
-import { useLayoutEffect } from "react"
-import { useMemo } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
-import Filters from "../../components/Filters/Filters"
-import Modal from "../../components/Modal/Modal"
-import Table from "../../components/Table/Table"
-import { allBrands } from "../../redux/slices/brands/brands"
+import React, { useCallback, useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Filters from "../../components/Filters/Filters";
+import Modal from "../../components/Modal/Modal";
+import Table from "../../components/Table/Table";
 import {
   DeleteSelectedCompany,
   GetAllBrandList,
-  UpdateCompany
-} from "../../services"
-import { baseURL } from "../../utils/http"
-import { DeleteMini, EditMini } from "../../utils/icons"
-import DeleteCompany from "../ModelList/Components/DeleteModel"
-import EditCompany from "./Components/EditCompany"
+  UpdateCompany,
+} from "../../services";
+import { baseURL } from "../../utils/http";
+import { DeleteMini, EditMini } from "../../utils/icons";
+import DeleteCompany from "../ModelList/Components/DeleteModel";
+import EditCompany from "./Components/EditCompany";
 
 const CompanyList = () => {
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  const { allBrandsDump } = useSelector(({ brands }) => brands);
 
-  const { allBrandList } = useSelector(({ brands }) => brands)
-
-  const [action, setAction] = useState("")
-  const [open, setOpen] = useState(false)
-  const [selectedRow, setSelectedRow] = useState({})
-  const [editedData, setEditedData] = useState("")
-  const [totalRows, setTotalRows] = useState(1)
-  const [perPage, setPerPage] = useState(10)
+  const [action, setAction] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState({});
+  const [editedData, setEditedData] = useState({});
 
   useLayoutEffect(() => {
     getData(perPage, totalRows)
@@ -47,35 +41,40 @@ const CompanyList = () => {
   }
 
   const handlePageChange = (page) => {
-    setPerPage(page)
-    getData(page)
-  }
+    setPerPage(page);
+    // loadData();
+  };
 
   const handlePerRowsChange = (rows) => {
-    setTotalRows(rows)
-  }
+    setTotalRows(rows);
+    // loadData();
+  };
+
+  // const loadData = () => {
+  //   GetAllBrandList({ totalRows, perPage });
+  // };
 
   const columns = useMemo(
     () => [
       {
         name: "Name",
-        selector: (row) => row.attributes.name
+        selector: (row) => row?.name,
       },
       {
         name: "Logo",
-        selector: (row) => row.attributes.logo.data.attributes.url,
+        selector: (row) => row?.logo?.formats?.thumbnail?.url,
         cell: (row) => (
           <img
-            src={`${baseURL}${row.attributes?.logo?.data?.attributes.url}`}
-            alt={row.attributes?.logo?.data?.attributes.name}
+            src={baseURL + row?.logo?.formats?.thumbnail?.url}
+            alt={row?.logo?.name}
             className="w-12 h-12 object-center object-contain"
           />
-        )
+        ),
       },
       {
         name: "Added At",
         selector: (row) =>
-          new Date(row.attributes.publishedAt).toLocaleDateString("es-CL")
+          new Date(row?.publishedAt).toLocaleDateString("es-CL"),
       },
       {
         name: "Action",
@@ -89,54 +88,65 @@ const CompanyList = () => {
               <DeleteMini />
             </span>
           </div>
-        )
-      }
+        ),
+      },
     ],
     []
-  )
+  );
 
   const handleAction = (type, row) => {
-    setSelectedRow(row)
+    setSelectedRow(row);
     if (type === "edit") {
-      editCompany(type)
+      editCompany(type);
     } else {
-      deleteCompany(type)
+      deleteCompany(type);
     }
-  }
+  };
 
   const editCompany = (type) => {
-    setAction(type)
-    setOpen(true)
-  }
+    setAction(type);
+    setOpen(true);
+  };
 
   const deleteCompany = (type) => {
-    setAction(type)
-    setOpen(true)
-  }
+    setAction(type);
+    setOpen(true);
+  };
 
   const handleSaveAction = () => {
     if (action === "edit") {
-      UpdateCompany({ id: selectedRow.id, value: editedData })
+      const formData = new FormData();
+      const _url = selectedRow?.url;
+      if (editedData?.logo) {
+        formData.append("files.logo", editedData?.logo, editedData?.logo?.name);
+      }
+      formData.append(
+        "data",
+        JSON.stringify({ name: editedData.name, logo: selectedRow?.logo })
+      );
+      UpdateCompany({ id: selectedRow.id, value: formData })
         .then((resp) => {
-          setOpen(false)
-          toast.success("Company updated successfully!")
+          setOpen(false);
+          toast.success("Company updated successfully!");
         })
         .catch((err) => toast.error("something went wrong"))
         .finally(() => {
-          getData(perPage, totalRows)
-        })
+          // GetAllBrandList({ totalRows, perPage });
+          GetAllBrandList();
+        });
     } else {
       DeleteSelectedCompany({ id: selectedRow.id })
         .then((resp) => {
-          setOpen(false)
-          toast.success("Company deleted successfully!")
+          setOpen(false);
+          toast.success("Company deleted successfully!");
         })
         .catch((err) => toast.error("something went wrong"))
         .finally(() => {
-          getData(perPage, totalRows)
-        })
+          // GetAllBrandList({ totalRows, perPage });
+          GetAllBrandList();
+        });
     }
-  }
+  };
 
   return (
     <>
@@ -149,7 +159,7 @@ const CompanyList = () => {
             action === "edit" ? (
               <EditCompany data={selectedRow} setEditedData={setEditedData} />
             ) : (
-              <DeleteCompany data={selectedRow} />
+              <DeleteCompany data={{ name: selectedRow.name }} />
             )
           }
           button={
@@ -197,7 +207,7 @@ const CompanyList = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default CompanyList
+export default CompanyList;

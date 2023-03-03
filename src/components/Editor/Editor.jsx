@@ -1,30 +1,14 @@
-import React from "react"
-import { CKEditor } from "@ckeditor/ckeditor5-react"
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic"
+import React, { useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Editor = ({ setData, data }) => {
+  const [value, setValue] = useState("");
   return (
     <div className="bg-white">
-      <CKEditor
-        editor={ClassicEditor}
-        data={data.details ?? ""}
-        onReady={(editor) => {
-          // You can store the "editor" and use when it is needed.
-          console.log("Editor is ready to use!", editor)
-        }}
-        onChange={(event, editor) => {
-          const data = editor.getData()
-          console.log({ event, editor, data })
-          setData((state) => {
-            return {
-              ...state,
-              details: data
-            }
-          })
-        }}
-      />
+      <ReactQuill theme="snow" value={value} onChange={setValue} />
     </div>
-  )
-}
+  );
+};
 
-export default Editor
+export default Editor;

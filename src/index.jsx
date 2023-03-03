@@ -48,10 +48,10 @@ const root = createRoot(container)
 root.render(
   <Suspense fallback={<Loader />}>
     <BrowserRouter>
-      <ToastContainer theme="colored" draggable={false} autoClose={3000} />
-      <Provider store={store}>
-        <App />
-      </Provider>
+        <ToastContainer theme="colored" draggable={false} autoClose={3000} />
+        <Provider store={store}>
+          <App />
+        </Provider>
     </BrowserRouter>
   </Suspense>
 )

@@ -1,44 +1,42 @@
-import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-const MAX_COUNT = 5
+const MAX_COUNT = 5;
 
 const AddModelMoq = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([])
-  const [fileLimit, setFileLimit] = useState(false)
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [fileLimit, setFileLimit] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm()
+    formState: { errors },
+  } = useForm();
 
   const handleUploadFiles = (files) => {
-    const uploaded = [...uploadedFiles]
-    let limitExceeded = false
+    const uploaded = [...uploadedFiles];
+    let limitExceeded = false;
     files.some((file) => {
       if (uploaded.findIndex((f) => f.name === file.name) === -1) {
-        uploaded.push(file)
-        if (uploaded.length === MAX_COUNT) setFileLimit(true)
+        uploaded.push(file);
+        if (uploaded.length === MAX_COUNT) setFileLimit(true);
         if (uploaded.length > MAX_COUNT) {
-          alert(`You can only add a maximum of ${MAX_COUNT} files`)
-          setFileLimit(false)
-          limitExceeded = true
-          return true
+          alert(`You can only add a maximum of ${MAX_COUNT} files`);
+          setFileLimit(false);
+          limitExceeded = true;
+          return true;
         }
       }
-    })
-    if (!limitExceeded) setUploadedFiles(uploaded)
-  }
+    });
+    if (!limitExceeded) setUploadedFiles(uploaded);
+  };
 
   const handleFileEvent = (e) => {
-    const chosenFiles = Array.prototype.slice.call(e.target.files)
-    handleUploadFiles(chosenFiles)
-  }
+    const chosenFiles = Array.prototype.slice.call(e.target.files);
+    handleUploadFiles(chosenFiles);
+  };
 
-  const createModelMoq = (data) => {
-    console.log(data)
-  }
+  const createModelMoq = (data) => {};
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
@@ -104,7 +102,7 @@ const AddModelMoq = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddModelMoq
+export default AddModelMoq;

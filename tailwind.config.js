@@ -3,7 +3,10 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx}"],
   theme: {
-    extend: {}
+    minWidth: {
+      "1/4": "25%",
+    },
+    extend: {},
   },
-  plugins: []
-}
+  plugins: [],
+};

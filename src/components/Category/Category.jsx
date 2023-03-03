@@ -42,12 +42,12 @@ const Category = () => {
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
         <p className="font-bold text-sm">Categories</p>
         <div className="grid grid-cols-4 xl:grid-cols-4 gap-12 xl:gap-16">
-          {allCategoryList?.map((category, index) => {
+          {allCategoryDump?.data?.map((category, index) => {
             return (
               <div
                 className="flex flex-col items-center"
                 key={index}
-                onClick={() => setProductCategory(category.attributes.name)}
+                onClick={() => setProductCategory(category.name)}
               >
                 <div
                   className={`w-14 h-14 flex justify-center items-center p-2 mb-2 sm:mb-4 ${
@@ -58,15 +58,15 @@ const Category = () => {
                 >
                   <img
                     src={`${
-                      baseURL + category.attributes.image.data.attributes.url
+                      baseURL + category?.image?.url
                     }`}
-                    alt={category.attributes.image.data.attributes.name}
+                    alt={category?.image?.name}
                     className="w-12 h-12 rounded-full"
                   />
                 </div>
 
                 <h3 className="text-sm font-semibold text-center mb-2">
-                  {category.attributes.name}
+                  {category?.name}
                 </h3>
               </div>
             )
@@ -98,17 +98,17 @@ const Category = () => {
                         {/* <img
                           src={`${
                             baseURL +
-                            subCategory.attributes.image.data.attributes.url
+                            subCategory?.attributes?.image?.data?.[0]?.attributes?.url ?? ""
                           }`}
                           alt={
-                            subCategory.attributes.image.data.attributes.name
+                            subCategory?.attributes?.image?.data?.[0]?.attributes?.name ?? ""
                           }
                           className="w-12 h-12 rounded-full"
                         /> */}
                       </div>
 
                       <h3 className="text-sm font-semibold text-center mb-2">
-                        {subCategory.attributes.name}
+                        {subCategory?.attributes?.name}
                       </h3>
                     </div>
                   )

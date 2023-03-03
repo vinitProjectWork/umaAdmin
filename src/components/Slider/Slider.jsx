@@ -1,4 +1,6 @@
-import Slider from "react-slick"
+import { useSelector } from "react-redux";
+import Slider from "react-slick";
+import { baseURL } from "../../utils/http";
 
 const settings = {
   dots: true,
@@ -14,44 +16,44 @@ const settings = {
         slidesToShow: 3,
         slidesToScroll: 3,
         infinite: true,
-        dots: true
-      }
+        dots: true,
+      },
     },
     {
       breakpoint: 600,
       settings: {
         slidesToShow: 2,
         slidesToScroll: 2,
-        initialSlide: 2
-      }
+        initialSlide: 2,
+      },
     },
     {
       breakpoint: 480,
       settings: {
         slidesToShow: 1,
-        slidesToScroll: 1
-      }
-    }
-  ]
-}
+        slidesToScroll: 1,
+      },
+    },
+  ],
+};
 
 const SlickSlider = () => {
-  return (
-    <Slider {...settings}>
-      <div>
-        <img src="http://placekitten.com/g/1920/400" />
-      </div>
-      <div>
-        <img src="http://placekitten.com/g/1920/400" />
-      </div>
-      <div>
-        <img src="http://placekitten.com/g/1920/400" />
-      </div>
-      <div>
-        <img src="http://placekitten.com/g/1920/400" />
-      </div>
-    </Slider>
-  )
-}
+  const { sliderImage } = useSelector(({ slider }) => slider);
 
-export default SlickSlider
+  return (
+    <Slider {...settings} autoplaySpeed={2000}>
+      {sliderImage.map((image, index) => {
+        return (
+          <div>
+            <img
+              className="h-80 w-full object-contain"
+              src={`${baseURL + image.sliderImage.url}`}
+            />
+          </div>
+        );
+      })}
+    </Slider>
+  );
+};
+
+export default SlickSlider;
