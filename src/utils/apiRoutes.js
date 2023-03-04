@@ -45,6 +45,10 @@ const appAPI = {
     endPoint: `${BASE_URL}/api/orders`,
     method: requestMethodTypes.GET,
   },
+  getOrdersWithUser: {
+    endPoint: `${BASE_URL}/api/orders/`,
+    method: requestMethodTypes.GET,
+  },
   getAllSubCategory: {
     endPoint: `${BASE_URL}/api/sub-categories?populate=*`,
     method: requestMethodTypes.GET,
@@ -166,4 +170,5 @@ export const {
   getAllSliderImages,
   deleteProduct,
   updateOrderStatus,
+  getOrdersWithUser,
 } = appAPI;

@@ -1,12 +1,21 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Table from "../../components/Table/Table";
-import { GetAllOrders, ModifyOrderStatus } from "../../services";
+import {
+  GetAllOrders,
+  GetOrdersWithUser,
+  ModifyOrderStatus,
+} from "../../services";
 import { toast } from "react-toastify";
 import Tabs from "../../components/Tabs/Tabs";
 import { useDispatch, useSelector } from "react-redux";
 import { allOrdersDump } from "../../redux/slices/orders/orders";
+import Invoice from "./Component/Invoice";
+import Label from "./Component/Label";
 
 const OrderList = () => {
+  const buttonRef = React.createRef();
+  const buttonRefLabel = React.createRef();
+
   const dispatch = useDispatch();
   const { allOrders } = useSelector(({ orders }) => orders);
 
@@ -18,6 +27,8 @@ const OrderList = () => {
     "InProgress",
   ]);
   const [selectedTab, setSelectedTab] = useState("Pending");
+  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [selectedRowIdLabel, setSelectedRowIdLabel] = useState(null);
 
   useEffect(() => {
     fileterOrders();
@@ -63,6 +74,32 @@ const OrderList = () => {
         </div>
       ),
     },
+    {
+      name: "Invoice",
+      cell: (row) => (
+        <button
+          className="border-2 border-green-500 p-1 font-medium"
+          onClick={() => {
+            setSelectedRowId(row.id);
+          }}
+        >
+          Download
+        </button>
+      ),
+    },
+    {
+      name: "Label",
+      cell: (row) => (
+        <button
+          className="border-2 border-green-500 p-1 font-medium"
+          onClick={() => {
+            setSelectedRowIdLabel(row.id);
+          }}
+        >
+          Download
+        </button>
+      ),
+    },
   ];
 
   const format_OrderDetails = (row) => {
@@ -102,6 +139,20 @@ const OrderList = () => {
 
   return (
     <>
+      {selectedRowId !== null && (
+        <Invoice
+          buttonRef={buttonRef}
+          setSelectedRowId={setSelectedRowId}
+          selectedRowId={selectedRowId}
+        />
+      )}
+      {selectedRowIdLabel !== null && (
+        <Label
+          buttonRef={buttonRefLabel}
+          setSelectedRowId={setSelectedRowIdLabel}
+          selectedRowId={selectedRowIdLabel}
+        />
+      )}
       <div>
         <div className="sm:px-6 w-full">
           <div className="px-4 md:px-10 py-4 md:py-7">

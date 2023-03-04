@@ -29,6 +29,7 @@ import {
   getUser,
   approveUserAction,
   updateOrderStatus,
+  getOrdersWithUser,
 } from "../utils/apiRoutes";
 import { http } from "../utils/http";
 
@@ -354,6 +355,19 @@ export const GetAllProducts = async () => {
     const { data } = await http.get(getAllProducts.endPoint, {
       withCredentials: true,
     });
+
+    return data;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+// Get All Products
+export const GetOrdersWithUser = async (_payload) => {
+  try {
+    const { data } = await http.get(
+      getOrdersWithUser.endPoint + `${_payload}?populate=deep,3`
+    );
 
     return data;
   } catch (err) {
