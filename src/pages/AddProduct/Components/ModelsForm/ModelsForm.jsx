@@ -8,7 +8,7 @@ const ModelsForm = ({ setData, data }) => {
   const handleUpdatedData = (value, type, index) => {
     if (type === "delete") {
       let tempData = { ...data };
-      let tempModel = JSON.parse(tempData?.modelDetailUpdated);
+      let tempModel = [...JSON.parse(tempData?.modelDetailUpdated)].sort((a, b) => a.brand - b.brand);
       tempModel.splice(index, 1);
       setData({
         ...tempData,
@@ -17,7 +17,7 @@ const ModelsForm = ({ setData, data }) => {
       });
     } else {
       let tempData = { ...data };
-      let tempModel = JSON.parse(tempData.modelDetailUpdated);
+      let tempModel = [...JSON.parse(tempData?.modelDetailUpdated)].sort((a, b) => a.brand - b.brand);
       let tempCurrentData = tempModel[index];
       tempCurrentData[type] = value;
       tempData.model = tempModel;
