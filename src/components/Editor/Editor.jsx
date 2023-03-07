@@ -6,7 +6,12 @@ const Editor = ({ setData, data }) => {
   const [value, setValue] = useState("");
   return (
     <div className="bg-white">
-      <ReactQuill theme="snow" value={value} onChange={setValue} />
+      <ReactQuill theme="snow" value={data?.details} onChange={(value) =>
+        setData({
+          ...data,
+          details: value
+        })
+      } />
     </div>
   );
 };
