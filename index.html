@@ -12,10 +12,39 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Uma Enterprise</title>
+  <style>
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      border-bottom: 1px dotted black;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: max-content;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 5px;
+
+      /* Position the tooltip */
+      position: absolute;
+      z-index: 100;
+      top:35px;
+      right: 0;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+    }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"> </script>
   <script type="module" src="/src/index.jsx"></script>
 </body>
 

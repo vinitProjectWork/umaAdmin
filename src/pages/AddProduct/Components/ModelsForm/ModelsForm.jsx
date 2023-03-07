@@ -17,7 +17,7 @@ const ModelsForm = ({ setData, data }) => {
       });
     } else {
       let tempData = { ...data };
-      let tempModel = [...JSON.parse(tempData?.modelDetailUpdated)].sort((a, b) => a.brand - b.brand);
+      let tempModel = [...JSON.parse(tempData.modelDetailUpdated)].sort((a, b) => a.brand - b.brand);
       let tempCurrentData = tempModel[index];
       tempCurrentData[type] = value;
       tempData.model = tempModel;

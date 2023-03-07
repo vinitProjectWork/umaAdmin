@@ -2,15 +2,16 @@ import React, { useCallback, useEffect, useState } from "react";
 import Table from "../../components/Table/Table";
 import {
   GetAllOrders,
-  GetOrdersWithUser,
   ModifyOrderStatus,
 } from "../../services";
 import { toast } from "react-toastify";
 import Tabs from "../../components/Tabs/Tabs";
 import { useDispatch, useSelector } from "react-redux";
 import { allOrdersDump } from "../../redux/slices/orders/orders";
-import Invoice from "./Component/Invoice";
 import Label from "./Component/Label";
+import PPS from "./Component/PPS";
+import { DownloadTag, InvoiceDocument, PackingSlip } from "../../utils/icons";
+import Invoice from "./Component/Invoice";
 
 const OrderList = () => {
   const buttonRef = React.createRef();
@@ -29,6 +30,7 @@ const OrderList = () => {
   const [selectedTab, setSelectedTab] = useState("Pending");
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [selectedRowIdLabel, setSelectedRowIdLabel] = useState(null);
+  const [selectedRowIdInvoice, setSelectedRowIdInvoice] = useState(null);
 
   useEffect(() => {
     fileterOrders();
@@ -75,31 +77,31 @@ const OrderList = () => {
       ),
     },
     {
-      name: "Invoice",
-      cell: (row) => (
-        <button
-          className="border-2 border-green-500 p-1 font-medium"
-          onClick={() => {
-            setSelectedRowId(row.id);
-          }}
-        >
-          Download
-        </button>
-      ),
-    },
-    {
       name: "Label",
-      cell: (row) => (
-        <button
-          className="border-2 border-green-500 p-1 font-medium"
-          onClick={() => {
-            setSelectedRowIdLabel(row.id);
-          }}
-        >
-          Download
-        </button>
-      ),
-    },
+      cell: (row) => <div className="flex gap-2 w-full">
+        <div className="tooltip">
+          <button className="border-2 border-green-500 p-1 font-medium"
+            onClick={() => setSelectedRowId(row.id)}>
+            <PackingSlip />
+          </button>
+          <span className="tooltiptext">Print Packing Slip</span>
+        </div>
+        <div className="tooltip">
+          <button className="border-2 border-green-500 p-1 font-medium"
+            onClick={() => setSelectedRowIdInvoice(row.id)}>
+            <InvoiceDocument />
+          </button>
+          <span className="tooltiptext">Invoice</span>
+        </div>
+        <div className="tooltip">
+          <button className="border-2 border-green-500 p-1 font-medium"
+            onClick={() => setSelectedRowIdLabel(row.id)}>
+            <DownloadTag />
+          </button>
+          <span className="tooltiptext">Label</span>
+        </div>
+      </div>
+    }
   ];
 
   const format_OrderDetails = (row) => {
@@ -140,7 +142,7 @@ const OrderList = () => {
   return (
     <>
       {selectedRowId !== null && (
-        <Invoice
+        <PPS
           buttonRef={buttonRef}
           setSelectedRowId={setSelectedRowId}
           selectedRowId={selectedRowId}
@@ -151,6 +153,13 @@ const OrderList = () => {
           buttonRef={buttonRefLabel}
           setSelectedRowId={setSelectedRowIdLabel}
           selectedRowId={selectedRowIdLabel}
+        />
+      )}
+      {selectedRowIdInvoice !== null && (
+        <Invoice
+          buttonRef={buttonRefLabel}
+          setSelectedRowId={setSelectedRowIdInvoice}
+          selectedRowId={selectedRowIdInvoice}
         />
       )}
       <div>

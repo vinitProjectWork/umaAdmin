@@ -55,7 +55,6 @@ const settings = {
 
 const ProductDetails = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   // const { cartData } = useSelector(({ cart }) => cart);
   const [open, setOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
@@ -87,15 +86,12 @@ const ProductDetails = () => {
     id,
     originalPrice,
     discountedPrice,
-    description,
+    invoiceProductName,
     moq,
     modelDetailUpdated,
-    details,
-    deliveryChargesOnline,
+    hsnSAC,
     deliveryChargesOffline,
-    product_medias,
     media,
-    groupedModel,
   } = productDetails;
 
   useEffect(() => {
@@ -151,7 +147,7 @@ const ProductDetails = () => {
             product_medias: [],
           });
         })
-        .catch((err) => {
+        .catch(() => {
           toast.error("Something went wrong");
         });
     }
@@ -193,15 +189,20 @@ const ProductDetails = () => {
   };
 
   useEffect(() => {
-    const sum = Object.values(addItem).reduce(
+    const addedModel = JSON.parse(modelDetailUpdated).filter(item => Object.keys(addItem).includes(item.value + ''))
+    const addedModelPrice = addedModel.map(item => parseFloat(item.price ?? originalPrice) * parseFloat(addItem[item.value]))
+    
+    const _TotalAddedQty = Object.values(addItem).reduce(
       (a, b) => parseInt(a) + parseInt(b),
       0
     );
-
-    const _price = originalPrice * sum;
+    const _price = Object.values(addedModelPrice).reduce(
+      (a, b) => parseInt(a) + parseInt(b),
+      0
+    );
     setTotalPrice(_price);
-    setTotalAddedQty(sum);
-    if (sum >= moq) {
+    setTotalAddedQty(_TotalAddedQty);
+    if (_TotalAddedQty >= moq) {
       setCanAddToCart(true);
     }
   }, [addItem]);
@@ -244,17 +245,6 @@ const ProductDetails = () => {
     };
 
     //preparing data
-    const _data = {
-      label: name,
-      image: media[0]?.preview,
-      productPrice: originalPrice,
-      productId: id,
-      productName: name,
-      model: _model,
-      totalPrice: _model?.reduce(getTotal, 0),
-      shippingOffline: _model?.reduce(getShippingTotalOffline, 0),
-      shippingOnline: _model?.reduce(deliveryChargesOnline, 0),
-    };
 
     // dispatch(intoCart(_data));
     toast.success("Product added into cart");
