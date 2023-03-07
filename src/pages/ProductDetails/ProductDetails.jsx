@@ -83,15 +83,12 @@ const ProductDetails = () => {
   });
   const {
     name,
-    id,
     originalPrice,
     discountedPrice,
-    invoiceProductName,
     moq,
+    model_qty,
     modelDetailUpdated,
-    hsnSAC,
     deliveryChargesOffline,
-    media,
   } = productDetails;
 
   useEffect(() => {
@@ -117,25 +114,6 @@ const ProductDetails = () => {
               id: item?.id,
             };
           });
-          // const currentProductCartData = cartData?.items?.filter(
-          //   (item) => item.productId == productId
-          // );
-          // if (currentProductCartData.length > 0) {
-          //   let _addItem = {};
-          //   groupedModel = currentProductCartData[0]?.model?.reduce(function (
-          //     r,
-          //     a
-          //   ) {
-          //     r[a.brand] = r[a.brand] || [];
-          //     r[a.brand].push(a);
-          //     return r;
-          //   },
-          //   Object.create(null));
-          //   currentProductCartData[0]?.model?.map((item) => {
-          //     _addItem[item.value] = parseInt(item.addQty);
-          //   });
-          //   setAddItem(_addItem);
-          // }
           setSelectedImage(media[0].preview);
           setSelectedModalImage(media[0].preview);
           setProductDetails({
@@ -191,7 +169,7 @@ const ProductDetails = () => {
   useEffect(() => {
     const addedModel = JSON.parse(modelDetailUpdated).filter(item => Object.keys(addItem).includes(item.value + ''))
     const addedModelPrice = addedModel.map(item => parseFloat(item.price ?? originalPrice) * parseFloat(addItem[item.value]))
-    
+
     const _TotalAddedQty = Object.values(addItem).reduce(
       (a, b) => parseInt(a) + parseInt(b),
       0
@@ -226,17 +204,7 @@ const ProductDetails = () => {
         }
       });
     });
-    const getTotal = (total, num) => {
-      const totalPrice =
-        parseFloat(num?.price ?? originalPrice) * parseInt(num?.addQty);
-      return total + totalPrice;
-    };
 
-    const getShippingTotalOffline = (total, num) => {
-      const totalPrice =
-        parseFloat(deliveryChargesOffline) * parseInt(num?.addQty);
-      return total + totalPrice;
-    };
 
     const deliveryChargesOnline = (total, num) => {
       const totalPrice =
@@ -341,14 +309,6 @@ const ProductDetails = () => {
                 </span>
                 <CaretDownMini />
               </div>
-
-              {/* <div className="font-bold cursor-pointer my-5 flex items-center gap-1">
-                <span onClick={() => handleModal("Return Policy")}>
-                  7 days Return
-                </span>
-                <CaretDownMini />
-              </div> */}
-
               <div className="mb-4">
                 <div className="flex items-end gap-2">
                   <span className="text-gray-800 text-xl md:text-2xl font-bold">
@@ -478,68 +438,16 @@ const ProductDetails = () => {
               })}
             </div>
           )}
-
-          <div className="mt-5">
-            <div className="my-2">
-              <p className="font-bold text-lg my-3">Recommendation</p>
-              <div className="lg:col-span-3">
-                {/* Replace with your content */}
-                {/* <div className="mx-auto max-w-2xl lg:max-w-7xl">
-                  <div className="grid grid-cols-1 gap-y-4 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
-                    {products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="group relative flex lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md"
-                      >
-                        <div className="min-h-80 aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:aspect-none lg:h-56">
-                          <img
-                            src={product.imageSrc}
-                            alt={product.imageAlt}
-                            className="h-full w-full object-fit object-center lg:h-full lg:w-full"
-                          />
-                        </div>
-                        <div className="mt-4 flex justify-center items-start flex-col px-1 w-full gap-3">
-                          <div className="flex justify-center flex-col items-center w-full gap-2">
-                            <h3 className="text-sm text-gray-700 font-normal">
-                              <span
-                                aria-hidden="true"
-                                className="absolute inset-0"
-                              />
-                              {product.material}
-                            </h3>
-                            <h3 className="text-gray-700 text-center font-bold text-md text-ellipsis">
-                              <a href={product.href}>
-                                <span
-                                  aria-hidden="true"
-                                  className="absolute inset-0"
-                                />
-                                {product.name}
-                              </a>
-                            </h3>
-                            <p className="font-medium text-md text-gray-900">
-                              {product.price ?? "₹ 25"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div> */}
-                {/* /End replace */}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
       <div className="fixed flex justify-between items-center bottom-0 w-full">
         {moq - totalAddedQty <= 0 ? null : (
           <div
-            className={`${
-              totalAddedQty !== 0
+            className={`${totalAddedQty !== 0
                 ? "fixed bottom-12 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
                 : "fixed bottom-0 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
-            }`}
+              }`}
           >
             {`Add ${moq - totalAddedQty} pcs to proceed`}
           </div>
@@ -549,11 +457,10 @@ const ProductDetails = () => {
           <div className="fixed w-full items-center border-t-2 bottom-0 flex justify-between bg-slate-50 px-5">
             <p className="font-semibold text-lg">{totalPrice} ₹</p>
             <button
-              className={`${
-                moq <= totalAddedQty
+              className={`${moq <= totalAddedQty
                   ? "bg-red-500 cursor-pointer"
                   : "bg-slate-500 cursor-not-allowed"
-              } my-2 mx-4 float-right px-5 py-2  text-white text-sm font-bold tracking-wide rounded-full focus:outline-none`}
+                } my-2 mx-4 float-right px-5 py-2  text-white text-sm font-bold tracking-wide rounded-full focus:outline-none`}
               disabled={moq >= totalAddedQty}
               onClick={() => handleAddToCart()}
             >
