@@ -42,8 +42,8 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
         <div className="w-full text-center mt-4 flex justify-around">
           <p>OrderId: {invoiceData?.id}</p>
           <p>
-            <span>{invoiceData?.users_permissions_user?.shop_name}</span> -
-            <span>{invoiceData?.users_permissions_user?.username}</span>
+            <span className="font-bold">{invoiceData?.users_permissions_user?.shop_name}</span> - &nbsp;
+            <span className="font-bold">{invoiceData?.users_permissions_user?.username}</span>
           </p>
           <p>
             {new Date().toLocaleDateString()}

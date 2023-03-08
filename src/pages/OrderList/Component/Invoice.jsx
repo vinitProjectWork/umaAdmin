@@ -10,6 +10,7 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
 
   const [invoiceData, setInvoiceData] = useState(null);
   const [invoiceId, setInvoiceId] = useState(null);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     getInvoiceData();
@@ -31,6 +32,13 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
     const _data = await GetOrdersWithUser(selectedRowId);
     if (_data?.data) {
       setInvoiceId(_data?.data.id)
+      setData({
+        user: _data?.data?.users_permissions_user,
+        deliveryCharges: _data?.data?.deliveryCharges,
+        orderAmount: _data?.data?.orderAmount,
+        productAmount: _data?.data?.productAmount,
+        createdAt: _data?.data?.createdAt
+      })
       const formatedModalData = []
       JSON.parse(_data?.data.orderDetails).map((item, index) => {
         item.model.map(subItem => {
@@ -67,9 +75,10 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
   };
 
 
-  var total = 0;
+  const withOutGSTDeliveryCharges = parseFloat((parseFloat(data?.deliveryCharges) * 100) / 118).toFixed(2)
+  var total = withOutGSTDeliveryCharges;
   return (
-    <div ref={ref} className="w-fullborder-2 border-slate-700 text-sm px-8 py-4" id={invoiceId}>
+    <div ref={ref} className="w-fullborder-2 border-slate-700 text-sm px-8 py-8" id={invoiceId}>
       <div>
         <div className="w-full flex justify-center bg-slate-300 text-lg">
           <p>UMA ENTERPRISE</p>
@@ -84,12 +93,17 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
         </div>
         <div className="flex w-full justify-center text-sm">
           <div className="w-3/5 flex flex-row border-2 p-2 border-l-0 pb-1 border-slate-700 ">
-            <div>M/S : </div>
-            <div>J.K.Mobile,<br />
-              Near Vikas Medical Store,<br />
-              Astron Chowk,Dhebar Road,<br />
-              Rajkot,Gujarat - 360005<br />
-              GSTIN: 24AANFJ6548D1Z9
+            <div>M/S :&nbsp;</div>
+            <div>{data?.user?.shop_name},<br />
+              {data?.user?.address1},<br />
+              {data?.user?.address2},<br />
+              {data?.user?.city}, {data?.user?.states}, {data?.user?.zipcode}<br />
+              {
+                data?.user?.gstin ? <p className="font-bold">GSTIN : {data?.user?.gstin} <br /> </p> : null
+              }
+              {
+                data?.user?.shop_act ? <p className="font-bold">Shop ACT : {data?.user?.shop_act} </p> : null
+              }
             </div>
           </div>
           <div className="w-2/5 border-2 border-x-0 text-sm border-slate-700 ">
@@ -109,8 +123,8 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
             </div>
           </div>
         </div>
-        <table className="w-full h-96 border-t-1 mt-2">
-          <thead className="bordertext-xs h-1">
+        <table className="w-full h-96 border-t-1 mt-2 text-xs">
+          <thead className="border h-1">
             <tr className="w-full">
               <th className="border border-b-0 border-r-0 border-slate-700 w-2 py-1 px-2">Sr.No.</th>
               <th className="border border-b-0 border-r-0 border-slate-700 w-64 py-1 px-2">Product Name</th>
@@ -124,20 +138,32 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
           <tbody>
             {
               invoiceData && invoiceData.map((item, index) => {
+                const withOutGSTPrice = parseFloat((parseFloat(item.price) * 100) / 118).toFixed(2);
+                const withOutGSTTotalPrice = parseFloat(parseFloat(withOutGSTPrice) * parseFloat(item.qty)).toFixed(2);
+                total = parseFloat(parseFloat(total) + parseFloat(withOutGSTTotalPrice)).toFixed(2);
                 return <tr>
                   <td className="border border-b-0 border-r-0 border-slate-700 w-2 py-1 px-2 text-center">{index + 1}</td>
                   <td className="border border-b-0 border-r-0 border-slate-700 w-64  py-1 px-2">{item.invoiceProductName}</td>
                   <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-1 text-center">{item.hsnSAC}</td>
                   <td className="border border-b-0 border-r-0 border-slate-700 w-8 py-1 px-2 text-right">{item.qty}</td>
-                  <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-2 text-right">{parseFloat(item.price).toFixed(2)}</td>
+                  <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-2 text-right">{withOutGSTPrice}</td>
                   <td className="border border-b-0 border-r-0 border-slate-700 w-4 py-1 px-2 text-right">18%</td>
-                  <td className="border border-b-0 border-slate-700 w-10 py-1 px-2 text-right">{parseFloat(parseFloat(item.price) * parseFloat(item.qty)).toFixed(2)}</td>
+                  <td className="border border-b-0 border-slate-700 w-10 py-1 px-2 text-right">{withOutGSTTotalPrice}</td>
                 </tr>
               })
             }
-            {Array.from(Array((20 - (invoiceData?.length ?? 0))).keys()).map((item, index) => {
+            <tr>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-2 py-1 px-2 text-center">{invoiceData?.length + 1 ?? 1}</td>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-64  py-1 px-2">Delivery Charges</td>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-1 text-center">-</td>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-8 py-1 px-2 text-right">-</td>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-2 text-right">{withOutGSTDeliveryCharges}</td>
+              <td className="border border-b-0 border-r-0 border-slate-700 w-4 py-1 px-2 text-right">18%</td>
+              <td className="border border-b-0 border-slate-700 w-10 py-1 px-2 text-right">{withOutGSTDeliveryCharges}</td>
+            </tr>
+            {Array.from(Array((19 - (invoiceData?.length ?? 0))).keys()).map((item, index) => {
               return <tr>
-                <td className="border border-b-0 border-r-0 border-slate-700 w-2 py-1 px-2 text-center">{index + 1 + invoiceData?.length}</td>
+                <td className="border border-b-0 border-r-0 border-slate-700 w-2 py-1 px-2 text-center">{index + 2 + invoiceData?.length}</td>
                 <td className="border border-b-0 border-r-0 border-slate-700 w-64  py-1 px-2"></td>
                 <td className="border border-b-0 border-r-0 border-slate-700 w-16 py-1 px-1 text-center"></td>
                 <td className="border border-b-0 border-r-0 border-slate-700 w-8 py-1 px-2 text-right"></td>
@@ -164,29 +190,33 @@ const Invoice = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
               <td className="font-medium border border-slate-700 text-left" colSpan={4}>
                 <div className="flex justify-between border-slate-700 bg-slate-300 px-2 border-b-2">
                   <p>Sub Total</p>
-                  <p>17900.00</p>
+                  <p>{parseFloat(total).toFixed(2)}</p>
                 </div>
                 <div className="flex justify-between px-2">
                   <p>Taxable Amount</p>
-                  <p>17900.00</p>
+                  <p>{parseFloat(total).toFixed(2)}</p>
                 </div>
-                <div className="flex justify-between px-2">
-                  <p>CGST 9.00%</p>
-                  <p>1611.00</p>
-                </div>
-                <div className="flex justify-between px-2">
-                  <p>IGST  9.00%</p>
-                  <p>1611.00</p>
-                </div>
+                {(data?.user?.zipcode > 360000 && data?.user?.zipcode < 400000) ?  <><div className="flex justify-between px-2">
+                    <p>CGST 9.00%</p>
+                    <p>{parseFloat(total * 0.09).toFixed(2)}</p>
+                  </div>
+                  <div className="flex justify-between px-2">
+                    <p>SGST 9.00%</p>
+                      <p>{parseFloat(total * 0.09).toFixed(2)}</p>
+                  </div></> : <>
+                  <div className="flex justify-between px-2">
+                    <p>IGST 18.00%</p>
+                    <p>{parseFloat(total * 0.18).toFixed(2)}</p>
+                  </div> </>}
                 <div className="flex justify-between px-2 border-slate-700 bg-slate-300 border-y-2">
                   <p>Grand Total</p>
-                  <p>21122.00</p>
+                  <p>{parseFloat(data?.orderAmount).toFixed(2)}</p>
                 </div>
                 <div className="px-2 text-extraSmall text-right">
                   For, Uma Enterprise
                   <img
                     src={Sign}
-                    height="30"
+                    height="25"
                     className="aspect-auto object-fit object-center"
                   />
                   (Authorised Signatory)
