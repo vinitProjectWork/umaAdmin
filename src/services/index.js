@@ -448,6 +448,20 @@ export const PostProductMedia = async (files) => {
   }
 };
 
+// Update Model
+export const PostProductMediaWithOutImage = async (order,id) => {
+  try {
+    const { data } = await http.put(postProductMedia.endPoint + `/${id}`, {
+      withCredentials: true,
+      data: { order },
+    });
+
+    return data;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
 //Get all slider images
 export const GetAllSliderImages = async () => {
   try {

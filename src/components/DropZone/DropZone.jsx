@@ -54,7 +54,7 @@ const Previews = ({ data, setData }) => {
   const handleReorderIndex = (value, index) => {
     let _files = data?.media;
     let _currentFile = _files[index];
-    _currentFile.order = value;
+    _currentFile.order = parseInt(value);
     // const _sortedMedia = [..._files].sort((a, b) => a.order - b.order);
     setData({ ...data, media: _files });
   };
