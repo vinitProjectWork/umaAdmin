@@ -65,6 +65,7 @@ const Header = () => {
     localStorage.removeItem("user");
     navigate("/");
     setIsLoggedIn(false);
+    window.location.reload()
     toast.success("You have successfully logout!");
   };
 
@@ -90,28 +91,25 @@ const Header = () => {
             </a>
           </div>
 
-          {window.location.pathname === "/products" ? null : (
-            <div
-              className="hidden lg:flex lg:gap-2 xl:gap-10 gap-10 justify-center"
-              aria-label="Global"
-            >
-              {PAGES.map((page, index) => {
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleMenuClick(page.href)}
-                    className={`text-gray-600 ${
-                      selectedLink === page.href
-                        ? "border-b-2 border-indigo-500"
-                        : ""
+          <div
+            className="hidden lg:flex lg:gap-2 xl:gap-10 gap-10 justify-center"
+            aria-label="Global"
+          >
+            {PAGES.map((page, index) => {
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleMenuClick(page.href)}
+                  className={`text-gray-600 ${selectedLink === page.href
+                      ? "border-b-2 border-indigo-500"
+                      : ""
                     } hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
-                  >
-                    {page.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                >
+                  {page.label}
+                </button>
+              );
+            })}
+          </div>
 
           <div className="flex lg:hidden">
             <button
@@ -183,25 +181,22 @@ const Header = () => {
                   </button>
                 </div>
               </div>
-              {window.location.pathname === "/products" ? null : (
-                <div className="mt-6">
-                  {PAGES.map((page, index) => {
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleMenuClick(page.href)}
-                        className={`${
-                          selectedLink === page.href
-                            ? "border-b-2 border-indigo-500"
-                            : ""
+              <div className="mt-6">
+                {PAGES.map((page, index) => {
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleMenuClick(page.href)}
+                      className={`${selectedLink === page.href
+                          ? "border-b-2 border-indigo-500"
+                          : ""
                         } flex flex-col text-gray-600 my-2 hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
-                      >
-                        {page.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                    >
+                      {page.label}
+                    </button>
+                  );
+                })}
+              </div>
 
               <div className="mt-6 flow-root">
                 <div className="-my-6 divide-y divide-gray-500/10">
