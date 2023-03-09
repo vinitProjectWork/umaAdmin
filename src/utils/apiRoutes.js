@@ -1,6 +1,6 @@
 // export const BASE_URL = "https://1f5d-2405-201-2024-d030-5c0e-1e9d-88d3-7100.in.ngrok.io"
 // export const BASE_URL = "http://localhost:1337";
-export const BASE_URL = "http://api.umaenterpriseindia.com";
+export const BASE_URL = "https://api.umaenterpriseindia.com";
 // export const BASE_URL = "https://0a43-42-106-14-153.in.ngrok.io/api/v1/users";
 
 export const requestMethodTypes = {

@@ -2,7 +2,7 @@ import axios from "axios";
 import { removeFromLS, getFromLS } from "./functions";
 
 // export const baseURL = "https://1f5d-2405-201-2024-d030-5c0e-1e9d-88d3-7100.in.ngrok.io"
-export const baseURL = "http://api.umaenterpriseindia.com";
+export const baseURL = "https://api.umaenterpriseindia.com";
 // export const baseURL = "http://localhost:1337";
 // export const baseURL = "https://0a43-42-106-14-153.in.ngrok.io/api/v1/users";
 
