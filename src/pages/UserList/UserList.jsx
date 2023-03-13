@@ -147,18 +147,24 @@ const UserList = () => {
             >
               <DeleteMini />
             </p> */}
-            <p
-              className="cursor-pointer text-green-800"
-              onClick={() => handleApproveUser(row.id)}
-            >
-              <ApproveIconMini />
-            </p>
-            <p
-              className="cursor-pointer text-green-800"
-              onClick={() => handleBlockUser(row.id)}
-            >
-              <BlockIcon />
-            </p>
+            <div className="tooltip">
+              <button
+                className="cursor-pointer text-green-800"
+                onClick={() => handleApproveUser(row.id)}
+              >
+                <ApproveIconMini />
+              </button>
+              <span className="tooltiptext">Approve User</span>
+            </div>
+            <div className="tooltip">
+              <button
+                className="cursor-pointer text-green-800"
+                onClick={() => handleBlockUser(row.id)}
+              >
+                <BlockIcon />
+              </button>
+              <span className="tooltiptext">Block User</span>
+            </div>
           </div>
         ),
       },
