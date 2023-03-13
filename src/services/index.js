@@ -92,10 +92,9 @@ export const ResendOtp = async () => {
 //approve user
 export const approveUser = async (userId) => {
   try {
-    const { data } = await http.post(
-      approveUserAction.endPoint + `/${userId}`,
-      {}
-    );
+    const { data } = await http.post(approveUserAction.endPoint, {
+      id: userId,
+    });
 
     return data;
   } catch (err) {
@@ -106,10 +105,9 @@ export const approveUser = async (userId) => {
 //block user
 export const blockUser = async (userId) => {
   try {
-    const { data } = await http.post(
-      blockUserAction.endPoint + `/${userId}`,
-      {}
-    );
+    const { data } = await http.post(blockUserAction.endPoint, {
+      id: userId,
+    });
 
     return data;
   } catch (err) {

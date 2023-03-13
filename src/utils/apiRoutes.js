@@ -33,11 +33,11 @@ const appAPI = {
     method: requestMethodTypes.GET,
   },
   approveUserAction: {
-    endPoint: `${BASE_URL}/api/send-otp`,
+    endPoint: `${BASE_URL}/api/users-permissions/approve`,
     method: requestMethodTypes.POST,
   },
   blockUserAction: {
-    endPoint: `${BASE_URL}/api/send-otp`,
+    endPoint: `${BASE_URL}/api/users-permissions/block`,
     method: requestMethodTypes.POST,
   },
   getUser: {
