@@ -167,8 +167,14 @@ const ProductDetails = () => {
   };
 
   useEffect(() => {
-    const addedModel = JSON.parse(modelDetailUpdated).filter(item => Object.keys(addItem).includes(item.value + ''))
-    const addedModelPrice = addedModel.map(item => parseFloat(item.price ?? originalPrice) * parseFloat(addItem[item.value]))
+    const addedModel = JSON.parse(modelDetailUpdated).filter((item) =>
+      Object.keys(addItem).includes(item.value + "")
+    );
+    const addedModelPrice = addedModel.map(
+      (item) =>
+        parseFloat(item.price ?? originalPrice) *
+        parseFloat(addItem[item.value])
+    );
 
     const _TotalAddedQty = Object.values(addItem).reduce(
       (a, b) => parseInt(a) + parseInt(b),
@@ -204,7 +210,6 @@ const ProductDetails = () => {
         }
       });
     });
-
 
     const deliveryChargesOnline = (total, num) => {
       const totalPrice =
@@ -249,7 +254,7 @@ const ProductDetails = () => {
               return (
                 <div key={index}>
                   {image.type === ".mp4" ? (
-                    <video autoPlay className="h-80 w-full object-contain">
+                    <video controls className="h-80 w-full object-contain">
                       <source
                         src={image.preview + "#t=0.001"}
                         type="video/mp4"
@@ -444,10 +449,11 @@ const ProductDetails = () => {
       <div className="fixed flex justify-between items-center bottom-0 w-full">
         {moq - totalAddedQty <= 0 ? null : (
           <div
-            className={`${totalAddedQty !== 0
+            className={`${
+              totalAddedQty !== 0
                 ? "fixed bottom-12 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
                 : "fixed bottom-0 bg-slate-700 w-full flex justify-center text-slate-50 py-1"
-              }`}
+            }`}
           >
             {`Add ${moq - totalAddedQty} pcs to proceed`}
           </div>
@@ -457,10 +463,11 @@ const ProductDetails = () => {
           <div className="fixed w-full items-center border-t-2 bottom-0 flex justify-between bg-slate-50 px-5">
             <p className="font-semibold text-lg">{totalPrice} ₹</p>
             <button
-              className={`${moq <= totalAddedQty
+              className={`${
+                moq <= totalAddedQty
                   ? "bg-red-500 cursor-pointer"
                   : "bg-slate-500 cursor-not-allowed"
-                } my-2 mx-4 float-right px-5 py-2  text-white text-sm font-bold tracking-wide rounded-full focus:outline-none`}
+              } my-2 mx-4 float-right px-5 py-2  text-white text-sm font-bold tracking-wide rounded-full focus:outline-none`}
               disabled={moq >= totalAddedQty}
               onClick={() => handleAddToCart()}
             >

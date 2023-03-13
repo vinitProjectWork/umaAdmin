@@ -63,10 +63,9 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
-    navigate("/");
     setIsLoggedIn(false);
-    window.location.reload()
     toast.success("You have successfully logout!");
+    window.location.href = window.location.origin + "/";
   };
 
   return (
@@ -100,10 +99,11 @@ const Header = () => {
                 <button
                   key={index}
                   onClick={() => handleMenuClick(page.href)}
-                  className={`text-gray-600 ${selectedLink === page.href
+                  className={`text-gray-600 ${
+                    selectedLink === page.href
                       ? "border-b-2 border-indigo-500"
                       : ""
-                    } hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
+                  } hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
                 >
                   {page.label}
                 </button>
@@ -187,10 +187,11 @@ const Header = () => {
                     <button
                       key={index}
                       onClick={() => handleMenuClick(page.href)}
-                      className={`${selectedLink === page.href
+                      className={`${
+                        selectedLink === page.href
                           ? "border-b-2 border-indigo-500"
                           : ""
-                        } flex flex-col text-gray-600 my-2 hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
+                      } flex flex-col text-gray-600 my-2 hover:text-indigo-500 active:text-indigo-700 font-semibold transition duration-100`}
                     >
                       {page.label}
                     </button>

@@ -22,7 +22,7 @@ const Otp = () => {
           localStorage.setItem("access_token", jwt);
           localStorage.setItem("user", JSON.stringify(user));
           toast.success("Otp verified successfully!");
-          navigate("/products");
+          window.location.href = window.location.origin + "/products";
         })
         .catch((error) => {
           toast.error("Something went wrong!");

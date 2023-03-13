@@ -1,64 +1,82 @@
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { updateUserDetails } from "../../services";
 
 const AddUser = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState({});
 
-  const createUser = (data) => {};
+  useEffect(() => {
+    if (location.state) {
+      setUserDetails({ ...location.state });
+    }
+  }, [location.state]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserDetails((state) => {
+      return {
+        ...state,
+        [name]: value,
+      };
+    });
+  };
+
+  const handleEditUser = () => {
+    updateUserDetails({ details: userDetails })
+      .then((res) => {
+        navigate("/user-list");
+        toast.success("User details updated successfully!");
+      })
+      .catch((err) => {
+        toast.error("Something went wrong!");
+      });
+  };
+
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="max-w-screen-2xl px-4 md:px-8 mx-auto">
         <div className="mb-10 md:mb-16">
           <h2 className="text-gray-800 text-2xl lg:text-3xl font-bold text-center mb-4 md:mb-6">
-            Add User
+            Edit User
           </h2>
         </div>
 
-        <form
-          onSubmit={handleSubmit(createUser)}
-          className="max-w-screen-md grid sm:grid-cols-2 gap-4 mx-auto"
-        >
+        <div className="max-w-screen-md grid sm:grid-cols-2 gap-4 mx-auto">
           <div className="sm:col-span-2">
             <label
-              htmlFor="full-name"
+              htmlFor="email"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
-              Full Name
+              Email
             </label>
             <input
-              name="full-name"
-              placeholder="Enter full name"
+              name="email"
+              type="email"
+              placeholder="Enter email"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("name", { required: true })}
+              onChange={(e) => handleChange(e)}
+              value={userDetails.email}
             />
-            {errors.name && (
-              <p className="text-red-500 font-normal text-sm">
-                Full name is required
-              </p>
-            )}
           </div>
-
           <div className="sm:col-span-2">
             <label
-              htmlFor="company"
+              htmlFor="shop_name"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
               Shop Name
             </label>
             <input
-              name="company"
+              name="shop_name"
+              value={userDetails.shop_name}
+              type="text"
               placeholder="Enter shop name"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("shop_name", { required: true })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.shop_name && (
-              <p className="text-red-500 font-normal text-sm">
-                Shop name is required
-              </p>
-            )}
           </div>
 
           <div className="sm:col-span-2">
@@ -72,60 +90,62 @@ const AddUser = () => {
               type="text"
               placeholder="Enter mobile number"
               name="mobile_number"
+              inputMode="numeric"
+              value={userDetails.username}
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("mobile_number", { required: true, pattern: /\d+/ })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.mobile_number && (
-              <p className="text-red-500 font-normal text-sm">
-                Mobile number is required
-              </p>
-            )}
+          </div>
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="alternate_mobile_number"
+              className="inline-block text-gray-800 text-sm sm:text-base mb-2"
+            >
+              Alternate Mobile Number
+            </label>
+            <input
+              type="text"
+              value={userDetails.alternate_mobile_number}
+              placeholder="Enter alternate mobile number"
+              name="alternate_mobile_number"
+              inputMode="numeric"
+              className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
+              onChange={(e) => handleChange(e)}
+            />
           </div>
 
           <div className="sm:col-span-2">
             <label
-              htmlFor="address_line_1"
+              htmlFor="address1"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
               Address Line 1
             </label>
             <input
-              name="address_line_1"
+              name="address1"
               type="text"
+              value={userDetails.address1}
               placeholder="Enter address line 1"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("address_line_1", {
-                required: true,
-              })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.address_line_1 && (
-              <p className="text-red-500 font-normal text-sm">
-                Address line 1 is required
-              </p>
-            )}
           </div>
 
           <div className="sm:col-span-2">
             <label
-              htmlFor="address_line_2"
+              htmlFor="address2"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
               Address Line 2
             </label>
             <input
-              name="address_line_2"
+              name="address2"
               type="text"
+              value={userDetails.address2}
               placeholder="Enter address line 2"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("address_line_2", {
-                required: true,
-              })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.address_line_2 && (
-              <p className="text-red-500 font-normal text-sm">
-                Address line 2 is required
-              </p>
-            )}
           </div>
 
           <div>
@@ -138,61 +158,43 @@ const AddUser = () => {
             <input
               name="city"
               type="text"
+              value={userDetails.city}
               placeholder="Enter city/district"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("city", {
-                required: true,
-              })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.city && (
-              <p className="text-red-500 font-normal text-sm">
-                City/District is required
-              </p>
-            )}
           </div>
           <div>
             <label
-              htmlFor="state"
+              htmlFor="states"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
               State
             </label>
             <input
-              name="state"
+              name="states"
               type="text"
+              value={userDetails.states}
               placeholder="Enter state"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("state", {
-                required: true,
-              })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.state && (
-              <p className="text-red-500 font-normal text-sm">
-                State is required
-              </p>
-            )}
           </div>
           <div>
             <label
-              htmlFor="pincode"
+              htmlFor="zipcode"
               className="inline-block text-gray-800 text-sm sm:text-base mb-2"
             >
-              Pincode
+              Zipcode
             </label>
             <input
-              name="pincode"
+              name="zipcode"
               type="text"
-              placeholder="Enter pincode"
+              value={userDetails.zipcode}
+              placeholder="Enter zipcode"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("pincode", {
-                required: true,
-              })}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.pincode && (
-              <p className="text-red-500 font-normal text-sm">
-                Pincode is required
-              </p>
-            )}
           </div>
           <div>
             <label
@@ -206,27 +208,37 @@ const AddUser = () => {
               type="text"
               placeholder="Enter GST number"
               className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
-              {...register("gstin", {
-                required: true,
-              })}
+              value={userDetails.gstin}
+              onChange={(e) => handleChange(e)}
             />
-            {errors.gstin && (
-              <p className="text-red-500 font-normal text-sm">
-                GST number is required
-              </p>
-            )}
+          </div>
+          <div>
+            <label
+              htmlFor="shop_act"
+              className="inline-block text-gray-800 text-sm sm:text-base mb-2"
+            >
+              Shop Act
+            </label>
+            <input
+              name="shop_act"
+              type="text"
+              placeholder="Enter shop act number"
+              className="w-full bg-gray-50 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 px-3 py-2"
+              onChange={(e) => handleChange(e)}
+              value={userDetails.shop_act}
+            />
           </div>
 
           <div className="sm:col-span-2 flex justify-between items-center">
             <button
-              type="submit"
-              onClick={() => handleSubmit(createUser)}
+              type="button"
+              onClick={() => handleEditUser()}
               className={`inline-block bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 cursor-pointer focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3`}
             >
               Edit
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

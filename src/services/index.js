@@ -30,6 +30,8 @@ import {
   approveUserAction,
   updateOrderStatus,
   getOrdersWithUser,
+  blockUserAction,
+  updateUser,
 } from "../utils/apiRoutes";
 import { http } from "../utils/http";
 
@@ -94,6 +96,34 @@ export const approveUser = async (userId) => {
       approveUserAction.endPoint + `/${userId}`,
       {}
     );
+
+    return data;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+//block user
+export const blockUser = async (userId) => {
+  try {
+    const { data } = await http.post(
+      blockUserAction.endPoint + `/${userId}`,
+      {}
+    );
+
+    return data;
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+//update user details
+export const updateUserDetails = async (_payload) => {
+  const { details } = _payload;
+  try {
+    const { data } = await http.put(updateUser.endPoint + `/${details?.id}`, {
+      ...details,
+    });
 
     return data;
   } catch (err) {
@@ -449,7 +479,7 @@ export const PostProductMedia = async (files) => {
 };
 
 // Update Model
-export const PostProductMediaWithOutImage = async (order,id) => {
+export const PostProductMediaWithOutImage = async (order, id) => {
   try {
     const { data } = await http.put(postProductMedia.endPoint + `/${id}`, {
       withCredentials: true,

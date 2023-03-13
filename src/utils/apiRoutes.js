@@ -1,4 +1,7 @@
 // export const BASE_URL = "https://1f5d-2405-201-2024-d030-5c0e-1e9d-88d3-7100.in.ngrok.io"
+
+import { baseURL } from "./http";
+
 // export const BASE_URL = "http://localhost:1337";
 export const BASE_URL = "https://api.umaenterpriseindia.com";
 // export const BASE_URL = "https://0a43-42-106-14-153.in.ngrok.io/api/v1/users";
@@ -30,6 +33,10 @@ const appAPI = {
     method: requestMethodTypes.GET,
   },
   approveUserAction: {
+    endPoint: `${BASE_URL}/api/send-otp`,
+    method: requestMethodTypes.POST,
+  },
+  blockUserAction: {
     endPoint: `${BASE_URL}/api/send-otp`,
     method: requestMethodTypes.POST,
   },
@@ -138,6 +145,10 @@ const appAPI = {
     endPoint: `${BASE_URL}/api/orders`,
     method: requestMethodTypes.PUT,
   },
+  updateUser: {
+    endPoint: `${baseURL}/api/users`,
+    method: requestMethodTypes.PUT,
+  },
 };
 
 export const {
@@ -146,6 +157,8 @@ export const {
   verifyOtp,
   resendOtp,
   approveUserAction,
+  blockUserAction,
+  updateUser,
   getUser,
   getAllCategory,
   getAllOrders,

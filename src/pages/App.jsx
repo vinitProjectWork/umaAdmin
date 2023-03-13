@@ -30,7 +30,7 @@ const PageNotFound = lazy(() => import("./PageNotFound/PageNotFound"));
 
 //componnets to add items
 const AddProduct = lazy(() => import("./AddProduct/AddProduct"));
-const AddUser = lazy(() => import("./AddUser/AddUser"));
+const EditUser = lazy(() => import("./EditUser/EditUser"));
 const AddCategory = lazy(() => import("./AddCategory/AddCategory"));
 const AddCompany = lazy(() => import("./AddCompany/AddCompany"));
 const AddModel = lazy(() => import("./AddModel/AddModel"));
@@ -66,7 +66,7 @@ const App = () => {
         <Route path="/privacy-policy-editor" element={<PrivacyPolicy />} />
 
         <Route path="/product" element={<AddProduct />} />
-        <Route path="/add-user" element={<AddUser />} />
+        <Route path="/edit-user" element={<EditUser />} />
         <Route path="/add-category" element={<AddCategory />} />
         <Route path="/add-sub-category" element={<AddSubCategory />} />
         <Route path="/add-moq" element={<AddMoq />} />

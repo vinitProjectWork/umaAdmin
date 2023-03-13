@@ -410,64 +410,71 @@ export default function ProductListing() {
                 {/* Replace with your content */}
                 <div className="mx-auto max-w-2xl lg:max-w-7xl">
                   <div className="grid grid-cols-2 gap-y-14 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
-                    {productList.map((product, index) => (
-                      <div>
-                        <div
-                          key={index}
-                          className="group relative h-full flex flex-col lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md cursor-pointer"
-                          onClick={() =>
-                            navigate(
-                              generatePath("/product-details/:id", {
-                                id: product.id,
-                              })
-                            )
-                          }
-                        >
-                          <div className="min-h-80 aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:aspect-none lg:h-80">
-                            <img
-                              src={`${baseURL}${product?.product_medias?.[0]?.media?.url}`}
-                              alt={product.imageAlt}
-                              className="h-full w-full object-fit object-center lg:h-full lg:w-full"
-                            />
-                          </div>
-                          <div className="mt-4 h-16 flex justify-center items-start flex-col px-1 w-full gap-3">
-                            <div className="flex justify-center flex-col items-center w-full gap-2">
-                              <h3 className="text-sm text-gray-700 text-center font-normal">
-                                <span
-                                  aria-hidden="true"
-                                  className="absolute inset-0"
+                    {productList?.length > 0 &&
+                      productList[0]?.product_medias?.length > 0 &&
+                      productList?.map((product, index) => {
+                        const _sortedMedia = [...product?.product_medias].sort(
+                          (a, b) => a.order - b.order
+                        );
+                        return (
+                          <div>
+                            <div
+                              key={index}
+                              className="group relative h-full flex flex-col lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md cursor-pointer"
+                              onClick={() =>
+                                navigate(
+                                  generatePath("/product-details/:id", {
+                                    id: product.id,
+                                  })
+                                )
+                              }
+                            >
+                              <div className="min-h-80 aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:aspect-none lg:h-80">
+                                <img
+                                  src={`${baseURL}${_sortedMedia[0]?.media?.url}`}
+                                  alt={product.imageAlt}
+                                  className="h-full w-full object-fit object-center lg:h-full lg:w-full"
                                 />
-                                {"U&E"}
-                              </h3>
-                              <h3 className="text-gray-700 text-center font-bold text-md">
-                                <p>{product?.name}</p>
-                              </h3>
-                              <p className="font-medium text-md text-gray-900">
-                                {"₹ " + product?.originalPrice}
-                              </p>
+                              </div>
+                              <div className="mt-4 h-16 flex justify-center items-start flex-col px-1 w-full gap-3">
+                                <div className="flex justify-center flex-col items-center w-full gap-2">
+                                  <h3 className="text-sm text-gray-700 text-center font-normal">
+                                    <span
+                                      aria-hidden="true"
+                                      className="absolute inset-0"
+                                    />
+                                    {"U&E"}
+                                  </h3>
+                                  <h3 className="text-gray-700 text-center font-bold text-md">
+                                    <p>{product?.name}</p>
+                                  </h3>
+                                  <p className="font-medium text-md text-gray-900">
+                                    {"₹ " + product?.originalPrice}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-row gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  navigate("/product?id=" + product?.id)
+                                }
+                                className="flex justify-center w-full mt-2 font-medium border-2 p-1"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteClick(product?.id)}
+                                className="flex justify-center w-1/4 mt-2 font-medium border-2 p-1"
+                              >
+                                Delete
+                              </button>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate("/product?id=" + product?.id)
-                            }
-                            className="flex justify-center w-full mt-2 font-medium border-2 p-1"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteClick(product?.id)}
-                            className="flex justify-center w-1/4 mt-2 font-medium border-2 p-1"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 </div>
                 {/* /End replace */}
