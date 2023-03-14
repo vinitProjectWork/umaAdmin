@@ -20,9 +20,11 @@ const UserList = () => {
 
   const { allUsers } = useSelector(({ users }) => users);
 
-  console.log("==>", allUsers);
-
   useEffect(() => {
+    getUserData();
+  }, []);
+
+  const getUserData = () => {
     getUserDetails()
       .then((resp) => {
         dispatch(allUsersDump(resp));
@@ -30,7 +32,7 @@ const UserList = () => {
       .catch((error) => {
         toast.error("Something went wrong!");
       });
-  }, []);
+  };
 
   const columns = useMemo(
     () => [
@@ -174,21 +176,27 @@ const UserList = () => {
 
   const handleApproveUser = (userId) => {
     approveUser(userId)
-      .then((resp) => console.log(resp))
-      .catch((error) => console.log(error));
+      .then((resp) => toast.success(resp.message))
+      .catch((error) => toast.error("Something went wrong"))
+      .finally(() => {
+        getUserData();
+      });
   };
 
   const handleBlockUser = (userId) => {
     blockUser(userId)
-      .then((resp) => console.log(resp))
-      .catch((error) => console.log(error));
+      .then((resp) => toast.success(resp.message))
+      .catch((error) => toast.error("Something went wrong"))
+      .finally(() => {
+        getUserData();
+      });
   };
 
-  const handleDeleteUser = () => {};
+  // const handleDeleteUser = () => {};
 
-  const handleEditUser = (row) => {
-    navigate("/edit-user", { state: { ...row } });
-  };
+  // const handleEditUser = (row) => {
+  //   navigate("/edit-user", { state: { ...row } });
+  // };
 
   return (
     <>
