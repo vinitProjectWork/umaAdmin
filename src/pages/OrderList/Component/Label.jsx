@@ -5,8 +5,15 @@ import { GetOrdersWithUser } from "../../../services";
 
 const ref = React.createRef();
 
-const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
-
+const PPS = ({
+  buttonRef,
+  setSelectedRowId,
+  selectedRowId,
+  labelObj,
+  setPrintLable,
+  setIsOpen,
+  setLableObj,
+}) => {
   const [invoiceData, setInvoiceData] = useState(null);
 
   useEffect(() => {
@@ -16,12 +23,22 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
   useEffect(() => {
     if (invoiceData) {
       var opt = {
-        jsPDF: { unit: 'in', format: 'A6', orientation: 'portrait', userUnit: 300 },
-        filename: 'AWB-' + invoiceData?.id + '.pdf',
+        jsPDF: {
+          unit: "in",
+          format: "A6",
+          orientation: "portrait",
+          userUnit: 300,
+        },
+        filename: "AWB-" + invoiceData?.id + ".pdf",
       };
-      const source = document.getElementById(invoiceData?.id)
-      html2pdf(source, opt)
-      // setSelectedRowId(null)
+      const source = document.getElementById(invoiceData?.id);
+      for (let i = 0; i < labelObj.pices; i++) {
+        html2pdf(source, opt);
+      }
+      setPrintLable(false);
+      setIsOpen(false);
+      setLableObj({ weight: "", height: "", length: "", pices: "", width: "" });
+      setSelectedRowId(null);
     }
   }, [invoiceData]);
 
@@ -32,13 +49,23 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
     }
   };
 
-
   var total = 0;
   return (
-    <div ref={ref} className="w-full p-8 text-sm font-arial" id={invoiceData?.id}>
+    <div
+      ref={ref}
+      className="w-full p-8 text-sm font-arial"
+      id={invoiceData?.id}
+    >
       <Fragment>
-        <div className="flex justify-center w-full">
+        <div className="flex flex-col items-center justify-center w-full">
           <p>Welcome to Uma Enterprise</p>
+          <div className="flex gap-2">
+            <p>W:{labelObj.weight}gm</p>
+            <p>H:{labelObj.height}in</p>
+            <p>W:{labelObj.width}in</p>
+            <p>L:{labelObj.length}in</p>
+            <p>P:{labelObj.pices}pcs</p>
+          </div>
         </div>
         <div className="flex justify-center h-36">
           <Barcode value="AWB322746384740" />
@@ -48,19 +75,18 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
             <p>Order Id: 2023030600001{invoiceData?.id}</p>
             <p>Ship Date: {new Date().toLocaleDateString()}</p>
           </div>
-          
+
           <div className="flex flex-col justify-center w-1/2 text-center">
             <div className="p-2 font-bold border-2 border-slate-700 text-mediumSmall">
               COD <br />
               Amount To Collect : 50000
             </div>
           </div>
-
         </div>
-        <div className="w-full mt-4 text-xs text-left">
+        <div className="w-full mt-1 text-xs text-left">
           <p className="font-medium">Ship To:</p>
           <p>
-            <span>{invoiceData?.users_permissions_user?.shop_name}</span> - 
+            <span>{invoiceData?.users_permissions_user?.shop_name}</span> -
             <span>{invoiceData?.users_permissions_user?.username}</span>
           </p>
           <p>
@@ -71,13 +97,16 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
             {invoiceData?.users_permissions_user?.zipcode}
           </p>
         </div>
-        
+
         <div className="w-full pt-2 mt-4 text-xs text-right border-t-2">
           <p className="font-medium">Ship From:</p>
           <p>
-            Uma Enterprise - 6354666868<br />
-            Shivam Industrial Zone-3, Kalawad Road,<br />
-            Opposite Sopan Hardware, Chhapara, Rajkot<br />
+            Uma Enterprise - 6354666868
+            <br />
+            Shivam Industrial Zone-3, Kalawad Road,
+            <br />
+            Opposite Sopan Hardware, Chhapara, Rajkot
+            <br />
             Gujarat - 360021.
           </p>
         </div>

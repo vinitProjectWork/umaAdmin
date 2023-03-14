@@ -34,7 +34,6 @@ const img = {
 };
 
 const Previews = ({ data, setData }) => {
-  console.log(data)
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [],
@@ -49,7 +48,7 @@ const Previews = ({ data, setData }) => {
       );
       data.media = data?.media ? [...data?.media, ..._files] : _files;
       setData((state) => {
-        return { ...state, media };
+        return { ...state };
       });
     },
   });
@@ -67,9 +66,7 @@ const Previews = ({ data, setData }) => {
     // let _currentFile = _files[index];
     // _currentFile.order = value;
     const _sortedMedia = [..._files].sort((a, b) => a.order - b.order);
-    setData((state) => {
-      return { ...state, media: _sortedMedia };
-    });
+    setData({ ...data, media: _sortedMedia });
   };
 
   const thumbs = data?.media?.map((file, index) => (
@@ -122,7 +119,7 @@ const Previews = ({ data, setData }) => {
               DeleteProductMediaById(file?.id).then((resp) => {});
               const media = data?.media?.filter((item) => item.id !== file?.id);
               setData((state) => {
-                return { ...state, product_medias: media };
+                return { ...state, media, product_medias: media };
               });
             }
           }}

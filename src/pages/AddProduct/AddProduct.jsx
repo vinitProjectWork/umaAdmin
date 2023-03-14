@@ -1,7 +1,7 @@
 import { Fragment, useEffect } from "react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import {
@@ -27,6 +27,7 @@ const STEPS = [
 ];
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const { allCategoryList } = useSelector(({ category }) => category);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [data, setData] = useState({});
@@ -102,46 +103,67 @@ const AddProduct = () => {
     });
   };
 
+  const checkProductMedia = () => {
+    const _sortedMedia = [...data?.media].sort((a, b) => a.order - b.order);
+    if (_sortedMedia[0].type === ".mp4") {
+      return false;
+    }
+    return true;
+  };
+
   const createProduct = () => {
-    CreateProduct({ category: data.category, media: data.media })
-      .then((resp) => {
-        productMediaUpload(resp.data.id);
-      })
-      .catch(() => toast.error("Something went wrong"));
+    if (checkProductMedia()) {
+      CreateProduct({ category: data.category, media: data.media })
+        .then((resp) => {
+          productMediaUpload(resp.data.id);
+        })
+        .catch(() => toast.error("Something went wrong"));
+    } else {
+      toast.info("Video can't be at first place");
+    }
   };
 
   const updateProduct = () => {
-    UpdateProduct(data)
-      .then((resp) => {})
-      .catch(() => toast.error("Something went wrong"));
+    if (checkProductMedia()) {
+      UpdateProduct(data)
+        .then((resp) => {})
+        .catch(() => toast.error("Something went wrong"));
+    } else {
+      toast.info("Video can't be at first place");
+    }
   };
 
   const handleNextStep = async (currentIndex) => {
-    if (currentIndex === 0 && data.id === undefined) {
-      createProduct();
-    } else {
-      const oldData = data?.media.filter((item) => !(item instanceof File));
-      if (oldData.length > 0) {
-        oldData.map(async (item) => {
-          await PostProductMediaWithOutImage(item.order, item.id)
-            .then(async function (values) {})
-            .catch(() => {
-              toast.error("Something went wrong!");
-            });
-        });
+    if (checkProductMedia()) {
+      if (currentIndex === 0 && data.id === undefined) {
+        createProduct();
+      } else {
+        const oldData = data?.media.filter((item) => !(item instanceof File));
+        if (oldData.length > 0) {
+          oldData.map(async (item) => {
+            await PostProductMediaWithOutImage(item.order, item.id)
+              .then(async function (values) {})
+              .catch(() => {
+                toast.error("Something went wrong!");
+              });
+          });
+        }
+        const newMedia = data?.media.filter((item) => item instanceof File);
+        if (newMedia.length > 0) {
+          await productMediaUpload(id);
+        }
+        updateProduct();
       }
-      const newMedia = data?.media.filter((item) => item instanceof File);
-      if (newMedia.length > 0) {
-        await productMediaUpload(id);
+      if (currentIndex + 1 < STEPS.length) {
+        setCurrentIndex((old) => old + 1);
+      } else {
+        setCurrentIndex(0);
+        setData({});
+        navigate("/products");
+        toast.success(`Product added successfully`);
       }
-      updateProduct();
-    }
-    if (currentIndex + 1 < STEPS.length) {
-      setCurrentIndex((old) => old + 1);
     } else {
-      setCurrentIndex(0);
-      setData({});
-      toast.success(`Product Created successfully`);
+      toast.info("Video can't be at first place");
     }
   };
 
