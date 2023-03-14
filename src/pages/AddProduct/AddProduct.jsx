@@ -20,10 +20,10 @@ import PriceForm from "./Components/PriceForm/PriceForm";
 import UploadForm from "./Components/UploadForm/UploadForm";
 
 const STEPS = [
-  { label: "Media", icon: Media },
-  { label: "Details", icon: Details },
-  { label: "Price", icon: Mobile },
-  { label: "Models", icon: Money },
+  { label: "Media" },
+  { label: "Details" },
+  { label: "Price" },
+  { label: "Models" },
 ];
 
 const AddProduct = () => {
@@ -112,7 +112,7 @@ const AddProduct = () => {
 
   const updateProduct = () => {
     UpdateProduct(data)
-      .then((resp) => { })
+      .then((resp) => {})
       .catch(() => toast.error("Something went wrong"));
   };
 
@@ -122,13 +122,13 @@ const AddProduct = () => {
     } else {
       const oldData = data?.media.filter((item) => !(item instanceof File));
       if (oldData.length > 0) {
-        oldData.map(async item => {
+        oldData.map(async (item) => {
           await PostProductMediaWithOutImage(item.order, item.id)
-            .then(async function (values) { })
+            .then(async function (values) {})
             .catch(() => {
               toast.error("Something went wrong!");
             });
-        })
+        });
       }
       const newMedia = data?.media.filter((item) => item instanceof File);
       if (newMedia.length > 0) {
@@ -182,16 +182,16 @@ const AddProduct = () => {
                     <Fragment key={index}>
                       <div className="flex items-center text-white relative">
                         <div
-                          className={`rounded-full text-center flex justify-center transition duration-500 ease-in-out h-12 w-12 py-3 border-2 ${index === currentIndex
+                          className={`rounded-full text-center flex justify-center transition duration-500 ease-in-out h-12 w-12 py-3 border-2 ${
+                            index === currentIndex
                               ? "text-white-600"
                               : "text-indigo-800"
-                            } border-indigo-600 ${index === currentIndex
+                          } border-indigo-600 ${
+                            index === currentIndex
                               ? "bg-indigo-600"
                               : "bg-white"
-                            }`}
-                        >
-                          <span>{step.icon}</span>
-                        </div>
+                          }`}
+                        ></div>
                         <div className="absolute top-0 -ml-10 text-center mt-16 w-32 flex justify-center text-xs font-medium uppercase text-indigo-600">
                           {step.label}
                         </div>

@@ -8,12 +8,12 @@ import { toast } from "react-toastify";
 import Logo from "../../asset/images/logo.png";
 
 const PAGES = [
+  { label: "Products", href: "/products" },
   { label: "Users", href: "/user-list" },
   { label: "Orders", href: "/order-list" },
   { label: "Company", href: "/company-list" },
   { label: "Model", href: "/model-list" },
   { label: "Category", href: "/category-list" },
-  { label: "products", href: "/products" },
   { label: "Slider", href: "/slider-config" },
   { label: "FAQ", href: "/faq" },
   { label: "About Us", href: "/about-us-editor" },
@@ -51,7 +51,7 @@ const Header = () => {
       const _link = localStorage.getItem("selected");
       setSelectedLink(_link);
     }
-  }, [selectedLink]);
+  }, [selectedLink, localStorage.getItem("selected")]);
 
   const handleMenuClick = (link) => {
     navigate(link);
@@ -63,6 +63,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
+    localStorage.removeItem("selected");
     setIsLoggedIn(false);
     toast.success("You have successfully logout!");
     window.location.href = window.location.origin + "/";
@@ -129,7 +130,7 @@ const Header = () => {
               <span className="flex px-1 items-center">
                 <button
                   onClick={() => handleLogout()}
-                  className="mx-3 block border-2 rounded-md border-slate-600 shadow-md py-1 px-1 text-base font-semibold leading-6 text-gray-900"
+                  className="mx-3 block border-b-2 border-red-500 p-1 text-base font-semibold leading-6 text-gray-900"
                 >
                   Logout
                 </button>
@@ -203,14 +204,16 @@ const Header = () => {
                 <div className="-my-6 divide-y divide-gray-500/10">
                   <div className="py-6">
                     {isLoggedIn ? (
-                      <span className="flex px-1 items-center">
+                      <Fragment>
+                        <div className="border-t-2 mb-1"></div>
                         <button
                           onClick={() => handleLogout()}
-                          className="block rounded-lg py-1 px-1 text-base font-semibold leading-6 text-gray-900"
+                          className="block p-1 text-base font-semibold leading-6 text-gray-900"
                         >
                           Logout
                         </button>
-                      </span>
+                        <div className="border-t-2 mt-1"></div>
+                      </Fragment>
                     ) : (
                       <Fragment>
                         <button

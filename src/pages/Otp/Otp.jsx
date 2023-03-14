@@ -11,23 +11,43 @@ const Otp = () => {
 
   const [otp, setOtp] = useState("");
   const [verification, setVerification] = useState(false);
+  const [errMessage, setErrMessage] = useState("");
 
-  const verifyOtp = () => {
-    setVerification(true);
-    setTimeout(() => {
-      VerifyOtp({ otp, mobileNumber: location?.state?.mobileNumber })
-        .then((resp) => {
-          setVerification(false);
-          const { jwt, user } = resp;
-          localStorage.setItem("access_token", jwt);
-          localStorage.setItem("user", JSON.stringify(user));
-          toast.success("Otp verified successfully!");
-          window.location.href = window.location.origin + "/products";
-        })
-        .catch((error) => {
-          toast.error("Something went wrong!");
-        });
-    }, 1500);
+  const validateForm = async () => {
+    if (otp === "") {
+      setErrMessage("Please enter OTP");
+      return false;
+    } else {
+      setErrMessage("");
+    }
+    return true;
+  };
+
+  const handleEnterKey = (e) => {
+    if (e.key === "Enter" || e.keyCode === 13) {
+      verifyOtp();
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (await validateForm()) {
+      setVerification(true);
+      setTimeout(() => {
+        VerifyOtp({ otp, mobileNumber: location?.state?.mobileNumber })
+          .then((resp) => {
+            setVerification(false);
+            const { jwt, user } = resp;
+            localStorage.setItem("access_token", jwt);
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("selected", "/products");
+            toast.success("Otp verified successfully!");
+            window.location.href = window.location.origin + "/products";
+          })
+          .catch((error) => {
+            toast.error("Something went wrong!");
+          });
+      }, 1500);
+    }
   };
 
   // const handleResendOTP = () => {
@@ -81,13 +101,23 @@ const Otp = () => {
                   autoComplete="new-password"
                   inputMode="numeric"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => {
+                    const inputVal = e.target.value.replace(/\D/g, "");
+                    if (otp.length < 6) {
+                      setOtp(inputVal);
+                    }
+                  }}
+                  onKeyUp={(e) => handleEnterKey(e)}
                   placeholder="Enter OTP"
                   className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
-
+            {errMessage !== "" ? (
+              <span className="text-red-500 text-xs font-medium">
+                {errMessage}
+              </span>
+            ) : null}
             <div className="flex flex-col space-y-5">
               <div>
                 <button

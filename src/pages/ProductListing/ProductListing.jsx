@@ -174,8 +174,8 @@ export default function ProductListing() {
                       role="list"
                       className="px-2 py-3 font-medium text-gray-900"
                     >
-                      {subCategories.map((category) => (
-                        <li key={category.name}>
+                      {subCategories.map((category, index) => (
+                        <li key={index}>
                           <a href={category.href} className="block px-2 py-3">
                             {category.name}
                           </a>
@@ -214,7 +214,7 @@ export default function ProductListing() {
                               <div className="space-y-6">
                                 {section.options.map((option, optionIdx) => (
                                   <div
-                                    key={option.value}
+                                    key={optionIdx}
                                     className="flex items-center"
                                   >
                                     <input
@@ -285,8 +285,8 @@ export default function ProductListing() {
                 >
                   <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="py-1">
-                      {sortOptions.map((option) => (
-                        <Menu.Item key={option.name}>
+                      {sortOptions.map((option, index) => (
+                        <Menu.Item key={index}>
                           {({ active }) => (
                             <a
                               href={option.href}
@@ -339,17 +339,17 @@ export default function ProductListing() {
                   role="list"
                   className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
-                  {subCategories.map((category) => (
-                    <li key={category.name}>
+                  {subCategories.map((category, index) => (
+                    <li key={index}>
                       <a href={category.href}>{category.name}</a>
                     </li>
                   ))}
                 </ul>
 
-                {filters.map((section) => (
+                {filters.map((section, index) => (
                   <Disclosure
                     as="div"
-                    key={section.id}
+                    key={index}
                     className="border-b border-gray-200 py-6"
                   >
                     {({ open }) => (
@@ -378,7 +378,7 @@ export default function ProductListing() {
                           <div className="space-y-4">
                             {section.options.map((option, optionIdx) => (
                               <div
-                                key={option.value}
+                                key={optionIdx}
                                 className="flex items-center"
                               >
                                 <input
@@ -417,9 +417,8 @@ export default function ProductListing() {
                           (a, b) => a.order - b.order
                         );
                         return (
-                          <div>
+                          <div key={index}>
                             <div
-                              key={index}
                               className="group relative h-full flex flex-col lg:block shadow-md p-2 ring-1 ring-gray-900/10 hover:ring-gray-900/20 rounded-md cursor-pointer"
                               onClick={() =>
                                 navigate(

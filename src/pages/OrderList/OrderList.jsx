@@ -1,9 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Table from "../../components/Table/Table";
-import {
-  GetAllOrders,
-  ModifyOrderStatus,
-} from "../../services";
+import { GetAllOrders, ModifyOrderStatus } from "../../services";
 import { toast } from "react-toastify";
 import Tabs from "../../components/Tabs/Tabs";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,81 +33,92 @@ const OrderList = () => {
     fileterOrders();
   }, [selectedTab]);
 
-  const columns = [
-    {
-      name: "Id",
-      selector: (row) => row.id,
-    },
-    {
-      name: "Details",
-      selector: (row) => row.orderDetails,
-      cell: (row) => format_OrderDetails(row),
-    },
-    {
-      name: "Product Price",
-      selector: (row) => row.productAmount,
-    },
-    {
-      name: "Order Price",
-      selector: (row) => row.orderAmount,
-    },
-    {
-      name: "Delivery Price",
-      selector: (row) => row.deliveryCharges,
-    },
-    {
-      name: "Action",
-      cell: (row) => (
-        <div>
-          <select
-            className="border-2 rounded-md shadow-sm border-indigo-500 p-1"
-            onChange={(e) => handleStatusChange(e.target.value, row.id)}
-            value={selectedTab}
-          >
-            <option value="cart">cart</option>
-            <option value="Pending">Pending</option>
-            <option value="Placed">Placed</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="InProgress">InProgress</option>
-          </select>
-        </div>
-      ),
-    },
-    {
-      name: "Label",
-      cell: (row) => <div className="flex gap-2 w-full">
-        <div className="tooltip">
-          <button className="border-2 border-green-500 p-1 font-medium"
-            onClick={() => setSelectedRowId(row.id)}>
-            <PackingSlip />
-          </button>
-          <span className="tooltiptext">Print Packing Slip</span>
-        </div>
-        <div className="tooltip">
-          <button className="border-2 border-green-500 p-1 font-medium"
-            onClick={() => setSelectedRowIdInvoice(row.id)}>
-            <InvoiceDocument />
-          </button>
-          <span className="tooltiptext">Invoice</span>
-        </div>
-        <div className="tooltip">
-          <button className="border-2 border-green-500 p-1 font-medium"
-            onClick={() => setSelectedRowIdLabel(row.id)}>
-            <DownloadTag />
-          </button>
-          <span className="tooltiptext">Label</span>
-        </div>
-      </div>
-    }
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        name: "Id",
+        grow: 0,
+        selector: (row) => row.id,
+      },
+      {
+        name: "Details",
+        grow: 1,
+        selector: (row) => row.orderDetails,
+        cell: (row) => format_OrderDetails(row),
+      },
+      {
+        name: "Product Price",
+        selector: (row) => row.productAmount,
+      },
+      {
+        name: "Order Price",
+        selector: (row) => row.orderAmount,
+      },
+      {
+        name: "Delivery Price",
+        selector: (row) => row.deliveryCharges,
+      },
+      {
+        name: "Action",
+        cell: (row) => (
+          <div>
+            <select
+              className="border-2 rounded-md shadow-sm border-indigo-500 p-1"
+              onChange={(e) => handleStatusChange(e.target.value, row.id)}
+              value={selectedTab}
+            >
+              <option value="cart">cart</option>
+              <option value="Pending">Pending</option>
+              <option value="Placed">Placed</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="InProgress">InProgress</option>
+            </select>
+          </div>
+        ),
+      },
+      {
+        name: "Label",
+        cell: (row) => (
+          <div className="flex gap-2 w-full">
+            <div className="tooltip">
+              <button
+                className="border-2 border-green-500 font-medium"
+                onClick={() => setSelectedRowId(row.id)}
+              >
+                <PackingSlip />
+              </button>
+              <span className="tooltiptext">Print Packing Slip</span>
+            </div>
+            <div className="tooltip">
+              <button
+                className="border-2 border-green-500 font-medium"
+                onClick={() => setSelectedRowIdInvoice(row.id)}
+              >
+                <InvoiceDocument />
+              </button>
+              <span className="tooltiptext">Invoice</span>
+            </div>
+            <div className="tooltip">
+              <button
+                className="border-2 border-green-500 font-medium"
+                onClick={() => setSelectedRowIdLabel(row.id)}
+              >
+                <DownloadTag />
+              </button>
+              <span className="tooltiptext">Label</span>
+            </div>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   const format_OrderDetails = (row) => {
     const _parsedData = JSON.parse(row?.orderDetails);
     return (
       <div className="flex flex-col gap-1 p-1">
-        <img src={_parsedData?.image} className="w-8 h-8 border-2" />
-        <p className="text-xs">{_parsedData?.label}</p>
-        <p>Per pcs price:{_parsedData?.productPrice}</p>
+        <p className="text-xs font-medium">{_parsedData[0]?.label}</p>
       </div>
     );
   };

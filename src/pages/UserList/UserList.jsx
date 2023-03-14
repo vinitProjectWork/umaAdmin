@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from "react";
-import DataTable from "react-data-table-component";
 import Filters from "../../components/Filters/Filters";
 import { useNavigate } from "react-router-dom";
 import Table from "../../components/Table/Table";
@@ -7,18 +6,25 @@ import { approveUser, blockUser, getUserDetails } from "../../services";
 import { useDispatch, useSelector } from "react-redux";
 import { allUsersDump } from "../../redux/slices/users/users";
 import { toast } from "react-toastify";
-import {
-  ApproveIconMini,
-  BlockIcon,
-  DeleteMini,
-  EditMini,
-} from "../../utils/icons";
+import { ApproveIconMini, BlockIcon } from "../../utils/icons";
+import { useState } from "react";
+import Modal from "../../components/Modal/Modal";
+
+const BlockUser = ({ data }) => {
+  const { shop_name } = data;
+  return (
+    <div className="font-medium text-red-500">{`Are you sure you want to block ${shop_name}?`}</div>
+  );
+};
 
 const UserList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { allUsers } = useSelector(({ users }) => users);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     getUserData();
@@ -40,7 +46,8 @@ const UserList = () => {
         name: "Shop Name",
         selector: (row) => row.shop_name,
         sortable: true,
-        grow: 1,
+        grow: 1.5,
+        wrap: true,
         cell: (row) => (
           <span className="font-medium">
             {row.shop_name !== "" ? row.shop_name : "N/A"}
@@ -51,7 +58,7 @@ const UserList = () => {
         name: "Email",
         selector: (row) => row.email,
         sortable: true,
-        grow: 1,
+        grow: 1.5,
         wrap: true,
       },
       {
@@ -59,6 +66,7 @@ const UserList = () => {
         selector: (row) => row.username,
         sortable: true,
         grow: 1,
+        wrap: true,
       },
       {
         name: "Address",
@@ -87,7 +95,7 @@ const UserList = () => {
         selector: (row) => row.gstin,
         cell: (row) => <span>{row.gstin ? row.gstin : "N/A"}</span>,
         sortable: true,
-        grow: 1,
+        grow: 1.5,
         wrap: true,
       },
       {
@@ -95,7 +103,7 @@ const UserList = () => {
         selector: (row) => row.shop_act,
         cell: (row) => <span>{row.shop_act ? row.shop_act : "N/A"}</span>,
         sortable: true,
-        grow: 1,
+        grow: 1.5,
         wrap: true,
       },
       {
@@ -105,10 +113,10 @@ const UserList = () => {
         center: true,
         cell: (row) => (
           <span
-            className={`border-2 font-medium p-1 shadow-md rounded-md ${
+            className={`font-medium p-1 rounded-md ${
               row.blocked
-                ? "text-white bg-red-600 border-red-500 cursor-pointer"
-                : "text-white bg-green-600 border-green-600 cursor-pointer"
+                ? "text-white border-2 bg-red-600 border-red-500 shadow-red-500 cursor-pointer"
+                : "text-green-600 shadow-green-800 cursor-pointer"
             }`}
           >
             {row.blocked ? "Yes" : "No"}
@@ -123,10 +131,10 @@ const UserList = () => {
         center: true,
         cell: (row) => (
           <span
-            className={`border-2 font-medium p-1 rounded-md shadow-md ${
-              row.confirmed
-                ? "text-white border-green-600 bg-green-600 cursor-pointer"
-                : "text-red-500 border-red-500 cursor-pointer"
+            className={`font-medium p-1 rounded-md ${
+              row.blocked
+                ? "text-white border-2 bg-red-600 border-red-500 shadow-red-500 cursor-pointer"
+                : "text-green-600 shadow-green-800 cursor-pointer"
             }`}
           >
             {row.confirmed ? "Yes" : "No"}
@@ -161,7 +169,7 @@ const UserList = () => {
             <div className="tooltip">
               <button
                 className="cursor-pointer text-green-800"
-                onClick={() => handleBlockUser(row.id)}
+                onClick={() => handleBlockUser(row)}
               >
                 <BlockIcon />
               </button>
@@ -183,12 +191,19 @@ const UserList = () => {
       });
   };
 
-  const handleBlockUser = (userId) => {
-    blockUser(userId)
+  const handleBlockUser = (user) => {
+    setIsOpen(true);
+    setUser(user);
+  };
+
+  const handleSaveAction = () => {
+    blockUser(user.id)
       .then((resp) => toast.success(resp.message))
       .catch((error) => toast.error("Something went wrong"))
       .finally(() => {
         getUserData();
+        setIsOpen(false);
+        setUser(null);
       });
   };
 
@@ -200,6 +215,23 @@ const UserList = () => {
 
   return (
     <>
+      {isOpen ? (
+        <Modal
+          open={isOpen}
+          setOpen={setIsOpen}
+          title={"Block User"}
+          children={<BlockUser data={user} />}
+          button={
+            <button
+              type="button"
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-indigo-300 bg-indigo-500 px-4 py-2 text-base font-medium text-gray-100 outline-none shadow-sm hover:bg-indigo-600 duration-200 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => handleSaveAction()}
+            >
+              {"Block"}
+            </button>
+          }
+        />
+      ) : null}
       <div>
         <div className="sm:px-6 w-full">
           <div className="px-4 md:px-10 py-4 md:py-7">

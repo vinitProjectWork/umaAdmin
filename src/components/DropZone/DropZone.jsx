@@ -34,6 +34,7 @@ const img = {
 };
 
 const Previews = ({ data, setData }) => {
+  console.log(data)
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [],
@@ -47,7 +48,9 @@ const Previews = ({ data, setData }) => {
         })
       );
       data.media = data?.media ? [...data?.media, ..._files] : _files;
-      setData({ ...data, media });
+      setData((state) => {
+        return { ...state, media };
+      });
     },
   });
 
@@ -64,13 +67,15 @@ const Previews = ({ data, setData }) => {
     // let _currentFile = _files[index];
     // _currentFile.order = value;
     const _sortedMedia = [..._files].sort((a, b) => a.order - b.order);
-    setData({ ...data, media: _sortedMedia });
+    setData((state) => {
+      return { ...state, media: _sortedMedia };
+    });
   };
 
   const thumbs = data?.media?.map((file, index) => (
     <div
       className="flex flex-col justify-center gap-2 border-2 m-1 border-indigo-500 p-2 rounded-md shadow-md"
-      key={file.name}
+      key={index}
     >
       <div className="flex items-center gap-2">
         <input
@@ -114,10 +119,11 @@ const Previews = ({ data, setData }) => {
           type="button"
           onClick={() => {
             if (confirm("Sure You want to delete?")) {
-              // DeleteProductMediaById(file?.id).then(resp => {
-              // })
+              DeleteProductMediaById(file?.id).then((resp) => {});
               const media = data?.media?.filter((item) => item.id !== file?.id);
-              setData({ ...data, media });
+              setData((state) => {
+                return { ...state, product_medias: media };
+              });
             }
           }}
           className="flex justify-center w-full mt-2 font-medium border-2 bg-red-900 text-slate-100 rounded-sm"

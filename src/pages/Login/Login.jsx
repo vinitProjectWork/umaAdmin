@@ -14,28 +14,79 @@ const Login = () => {
     password: "",
   });
   const [passwordVisibility, setPasswordVisibility] = useState(false);
+  const [errMessage, setErrMessage] = useState({
+    identifier: "",
+    password: "",
+  });
 
   const toggleVisibility = () => {
     setPasswordVisibility((old) => !old);
   };
 
-  const handleSubmit = () => {
-    setProcessing(true);
-    setTimeout(() => {
-      LoginUser({ userDetails })
-        .then((resp) => {
-          if (resp.flag) {
-            toast.success("OTP sent successfully!");
-            navigate("/verify-otp", {
-              state: { mobileNumber: userDetails?.identifier },
-            });
-          }
-        })
-        .catch((error) => {
-          toast.error("Something went wrong!");
-        });
-      setProcessing(false);
-    }, 1000);
+  const verifyForm = async () => {
+    //for mobile number
+    if (userDetails.identifier === "" || userDetails.identifier.length !== 10) {
+      setErrMessage((state) => {
+        return {
+          ...state,
+          identifier: "Please enter valid mobile number",
+        };
+      });
+      return false;
+    } else {
+      setErrMessage((state) => {
+        return {
+          ...state,
+          identifier: "",
+        };
+      });
+    }
+
+    //for password
+    if (userDetails.password === "" || userDetails.password.length !== 6) {
+      setErrMessage((state) => {
+        return {
+          ...state,
+          password: "Password must be of 6 digit",
+        };
+      });
+      return false;
+    } else {
+      setErrMessage((state) => {
+        return {
+          ...state,
+          password: "",
+        };
+      });
+    }
+    return true;
+  };
+
+  const handleEnterKey = (e) => {
+    if (e.key === "Enter" || e.keyCode === 13) {
+      handleSubmit();
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (await verifyForm()) {
+      setProcessing(true);
+      setTimeout(() => {
+        LoginUser({ userDetails })
+          .then((resp) => {
+            if (resp.flag) {
+              toast.success("OTP sent successfully!");
+              navigate("/verify-otp", {
+                state: { mobileNumber: userDetails?.identifier },
+              });
+            }
+          })
+          .catch((error) => {
+            toast.error("Something went wrong!");
+          });
+        setProcessing(false);
+      }, 1000);
+    }
   };
 
   return (
@@ -76,20 +127,28 @@ const Login = () => {
                 type="text"
                 autoComplete="new-password"
                 inputMode="numeric"
-                value={userDetails?.mobile_number}
-                onChange={(e) =>
-                  setUserDetails((state) => {
-                    return {
-                      ...state,
-                      identifier: e.target.value.replace(/[^\d,]/g, ""),
-                    };
-                  })
-                }
+                value={userDetails?.identifier}
+                onChange={(e) => {
+                  const inputVal = e.target.value.replace(/\D/g, "");
+                  if (userDetails.identifier.length < 10) {
+                    setUserDetails((state) => {
+                      return {
+                        ...state,
+                        identifier: inputVal,
+                      };
+                    });
+                  }
+                }}
                 placeholder="Enter mobile number"
                 className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               />
             </div>
           </div>
+          {errMessage.identifier !== "" ? (
+            <span className="text-red-500 text-xs font-medium">
+              {errMessage.identifier}
+            </span>
+          ) : null}
 
           <div className="-space-y-px rounded-md shadow-sm">
             <label htmlFor="password" className="font-semibold">
@@ -102,15 +161,19 @@ const Login = () => {
                 type={passwordVisibility ? "text" : "password"}
                 autoComplete="new-password"
                 inputMode="numeric"
-                value={userDetails?.pin}
-                onChange={(e) =>
+                value={userDetails?.password}
+                onChange={(e) => {
+                  const inputVal = e.target.value.replace(/\D/g, "");
                   setUserDetails((state) => {
                     return {
                       ...state,
-                      password: e.target.value,
+                      password: inputVal,
                     };
-                  })
-                }
+                  });
+                }}
+                onKeyUp={(e) => handleEnterKey(e)}
+                pattern="[0-9]{6}"
+                maxLength={6}
                 placeholder="Enter Password"
                 className="bg-transparent w-full focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
               />
@@ -122,6 +185,11 @@ const Login = () => {
               </div>
             </div>
           </div>
+          {errMessage.password !== "" ? (
+            <span className="text-red-500 text-xs font-medium">
+              {errMessage.password}
+            </span>
+          ) : null}
 
           <button
             type="submit"

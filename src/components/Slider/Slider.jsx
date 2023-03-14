@@ -44,7 +44,7 @@ const SlickSlider = () => {
     <Slider {...settings} autoplaySpeed={2000}>
       {sliderImage.map((image, index) => {
         return (
-          <div>
+          <div key={index}>
             <img
               className="h-80 w-full object-contain"
               src={`${baseURL + image.sliderImage.url}`}
