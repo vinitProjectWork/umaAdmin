@@ -21,7 +21,7 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
       };
       const source = document.getElementById(invoiceData?.id)
       html2pdf(source, opt)
-      setSelectedRowId(null)
+      // setSelectedRowId(null)
     }
   }, [invoiceData]);
 
@@ -35,29 +35,29 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
 
   var total = 0;
   return (
-    <div ref={ref} className="w-full p-8 text-sm" id={invoiceData?.id}>
+    <div ref={ref} className="w-full p-8 text-sm font-arial" id={invoiceData?.id}>
       <Fragment>
-        <div className="w-full flex justify-center">
+        <div className="flex justify-center w-full">
           <p>Welcome to Uma Enterprise</p>
         </div>
         <div className="flex justify-center h-36">
           <Barcode value="AWB322746384740" />
         </div>
-        <div className="flex w-full border-y-2 py-2 my-2 justify-between">
-          <div className="text-mediumSmall font-bold">
+        <div className="flex justify-between w-full py-2 my-2 border-y-2">
+          <div className="font-bold text-mediumSmall">
             <p>Order Id: 2023030600001{invoiceData?.id}</p>
             <p>Ship Date: {new Date().toLocaleDateString()}</p>
           </div>
           
-          <div className="flex w-1/2 flex-col justify-center text-center">
-            <div className="border-2 border-slate-700 p-2 font-bold text-mediumSmall">
+          <div className="flex flex-col justify-center w-1/2 text-center">
+            <div className="p-2 font-bold border-2 border-slate-700 text-mediumSmall">
               COD <br />
               Amount To Collect : 50000
             </div>
           </div>
 
         </div>
-        <div className="w-full text-left mt-4 text-xs">
+        <div className="w-full mt-4 text-xs text-left">
           <p className="font-medium">Ship To:</p>
           <p>
             <span>{invoiceData?.users_permissions_user?.shop_name}</span> - 
@@ -72,7 +72,7 @@ const PPS = ({ buttonRef, setSelectedRowId, selectedRowId }) => {
           </p>
         </div>
         
-        <div className="w-full text-right mt-4 border-t-2 pt-2 text-xs">
+        <div className="w-full pt-2 mt-4 text-xs text-right border-t-2">
           <p className="font-medium">Ship From:</p>
           <p>
             Uma Enterprise - 6354666868<br />
